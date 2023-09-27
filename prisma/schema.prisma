@@ -12,3 +12,8 @@ model CrateSrc {
   path String
   type String
 }
+
+model FilesDirectory {
+  id   Int    @id @default(autoincrement())
+  path String
+}

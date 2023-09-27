@@ -1,7 +1,13 @@
-import { CREATE_CRATE_SRC } from './constants'
+import { CrateSrc, FilesDirectory } from '@prisma/client'
+import { CREATE_CRATE_SRC, GET_CRATE_SRCS } from './constants'
+
+export type DatabaseOperationResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: string }
 
 export type MainState = {
-  crateSrcs: string[]
+  crateSrcs: CrateSrc[]
+  directorySrcs: FilesDirectory[]
 }
 
 export interface CreateCrateSrcAction {
@@ -11,7 +17,14 @@ export interface CreateCrateSrcAction {
   }
 }
 
-export type MainActions = CreateCrateSrcAction
+export interface GetCrateSrcs {
+  type: typeof GET_CRATE_SRCS
+  payload: {
+    crateSrcs: CrateSrc[]
+  }
+}
+
+export type MainActions = CreateCrateSrcAction | GetCrateSrcs
 
 export interface MainContextProps {
   state: MainState

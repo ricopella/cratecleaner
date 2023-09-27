@@ -16,7 +16,7 @@ export const MainProvider: React.FC<MainProviderProps> = ({ children }) => {
 }
 
 // Custom hook to use the directory state and dispatch
-export const useDirectory = (): MainContextProps => {
+export const useMain = (): MainContextProps => {
   const context = useContext(MainContext)
   if (!context) {
     throw new Error('useDirectory must be used within a DirectoryProvider')
