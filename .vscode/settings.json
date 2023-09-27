@@ -7,5 +7,14 @@
   },
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "database": "${workspaceFolder:cc}/prisma/dev.db",
+      "name": "dev"
+    }
+  ],
+  "sqltools.useNodeRuntime": true
 }

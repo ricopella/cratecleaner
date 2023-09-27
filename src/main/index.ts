@@ -1,7 +1,10 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import { BrowserWindow, app, shell } from 'electron'
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+
+import { registerFileDialogHandler } from './handlers/dialogs'
 
 function createWindow(): void {
   // Create the browser window.
@@ -49,6 +52,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  // CUSTOM HANDLERS
+  registerFileDialogHandler()
+
   createWindow()
 
   app.on('activate', function () {
@@ -56,6 +62,14 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('ready', () => {
+  if (typeof installExtension === 'function') {
+    installExtension(REACT_DEVELOPER_TOOLS)
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log('An error occurred: ', err))
+  }
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
