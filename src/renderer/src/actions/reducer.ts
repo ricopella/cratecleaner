@@ -1,4 +1,4 @@
-import { GET_CRATE_SRCS } from '@src/constants'
+import { GET_CRATE_SRCS, GET_FILES_DIRECTORIES } from '@src/constants'
 import { MainActions, MainState } from '@src/types'
 
 export const initialState: MainState = {
@@ -10,6 +10,11 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
   switch (action.type) {
     case GET_CRATE_SRCS:
       return { ...state, crateSrcs: action.payload.crateSrcs }
+    case GET_FILES_DIRECTORIES:
+      return {
+        ...state,
+        directorySrcs: action.payload.directorySrcs
+      }
     default:
       return state
   }

@@ -1,8 +1,10 @@
-import { CrateSrc } from '@prisma/client'
+import { CrateSrc, FilesDirectory } from '@prisma/client'
 import {
   DIALOG_CRATE_SRC,
   DIALOG_FILES_DIRECTORY,
   GET_CRATE_SRCS,
+  GET_DUPLICATES,
+  GET_FILES_DIRECTORIES,
   NEW_CRATE_SRC,
   NEW_FILES_DIRECTORY
 } from '@src/constants'
@@ -40,14 +42,32 @@ export const removeSelectFilesDirectoryListener = (callback: CallBack): void => 
   ipcRenderer.removeListener(NEW_FILES_DIRECTORY, callback)
 }
 
-export const getCrateSrcs = (): Promise<DatabaseOperationResult<CrateSrc[]>> => {
-  // TODO: use async/await
-  return ipcRenderer
-    .invoke(GET_CRATE_SRCS)
-    .then((result: DatabaseOperationResult<CrateSrc[]>) => {
-      return result
-    })
-    .catch((error) => {
-      console.error({ error })
-    })
+export const getCrateSrcs = async (): Promise<DatabaseOperationResult<CrateSrc[]>> => {
+  try {
+    const result = await ipcRenderer.invoke(GET_CRATE_SRCS)
+    return result
+  } catch (error) {
+    console.error({ error })
+    return { success: false, error: (error as { message: string }).message }
+  }
+}
+
+export const getFilesDirectories = async (): Promise<DatabaseOperationResult<FilesDirectory[]>> => {
+  try {
+    const result = await ipcRenderer.invoke(GET_FILES_DIRECTORIES)
+    return result
+  } catch (error) {
+    console.error({ error })
+    return { success: false, error: (error as { message: string }).message }
+  }
+}
+
+export const getDuplicates = async (): Promise<DatabaseOperationResult<string[]>> => {
+  try {
+    const result = await ipcRenderer.invoke(GET_DUPLICATES)
+    return result
+  } catch (error) {
+    console.error({ error })
+    return { success: false, error: (error as { message: string }).message }
+  }
 }

@@ -1,13 +1,13 @@
-import { GET_CRATE_SRCS } from '@src/constants'
+import { GET_FILES_DIRECTORIES } from '@src/constants'
 import { useEffect } from 'react'
 
 import { useMain } from '@renderer/actions/context'
 import {
   CallBack,
-  getCrateSrcs,
-  listenForSelectDirectory,
-  openCrateDialog,
-  removeSelectDirectoryListener
+  getFilesDirectories,
+  listenForSelectFilesDirectory,
+  openFilesDirectoryDialog,
+  removeSelectFilesDirectoryListener
 } from '@renderer/actions/ipc'
 
 const callback: CallBack = (path: string) => {
@@ -16,11 +16,10 @@ const callback: CallBack = (path: string) => {
 
 export const useListenForSelectDirectory = (): void => {
   useEffect(() => {
-    // TODO: this will need to dispatch state changes
-    listenForSelectDirectory(callback)
+    listenForSelectFilesDirectory(callback)
 
     return () => {
-      removeSelectDirectoryListener(callback)
+      removeSelectFilesDirectoryListener(callback)
     }
   }, [callback])
 }
@@ -32,12 +31,12 @@ export const useFetchCrateSrcs = (): void => {
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
       // TODO: add error handling and loading states
-      const crates = await getCrateSrcs()
+      const fileDirs = await getFilesDirectories()
 
       dispatch({
-        type: GET_CRATE_SRCS,
+        type: GET_FILES_DIRECTORIES,
         payload: {
-          crateSrcs: crates.success ? crates.data : []
+          directorySrcs: fileDirs.success ? fileDirs.data : []
         }
       })
     }
@@ -54,12 +53,12 @@ function App(): JSX.Element {
   useListenForSelectDirectory()
   useFetchCrateSrcs()
 
-  const crates = state.crateSrcs
+  const directories = state.directorySrcs
 
   return (
     <div className="container">
-      <button onClick={openCrateDialog}>Set Crate Path</button>
-      {(crates || []).map((crate) => (
+      <button onClick={openFilesDirectoryDialog}>Set Directory Path</button>
+      {(directories || []).map((crate) => (
         <div className="text-2xl" key={crate.id}>
           {crate.path}
         </div>

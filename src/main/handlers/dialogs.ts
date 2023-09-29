@@ -1,9 +1,8 @@
-import { createCrateSrc, createFilesDirectory, getCrateSrcs } from '@src/db/actions'
+import { createCrateSrc, createFilesDirectory } from '@src/db/actions'
 import { dialog, ipcMain } from 'electron'
 import {
   DIALOG_CRATE_SRC,
   DIALOG_FILES_DIRECTORY,
-  GET_CRATE_SRCS,
   NEW_CRATE_SRC,
   NEW_FILES_DIRECTORY
 } from '../../constants'
@@ -31,11 +30,5 @@ export const registerFileDialogHandler = (): void => {
       await createFilesDirectory(result.filePaths[0])
       event.sender.send(NEW_FILES_DIRECTORY, result.filePaths[0])
     }
-  })
-
-  ipcMain.handle(GET_CRATE_SRCS, async () => {
-    const result = await getCrateSrcs()
-
-    return result
   })
 }

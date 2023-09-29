@@ -1,5 +1,5 @@
 import { CrateSrc, FilesDirectory } from '@prisma/client'
-import { CREATE_CRATE_SRC, GET_CRATE_SRCS } from './constants'
+import { CREATE_CRATE_SRC, GET_CRATE_SRCS, GET_FILES_DIRECTORIES } from './constants'
 
 export type DatabaseOperationResult<T> =
   | { success: true; data: T }
@@ -24,9 +24,22 @@ export interface GetCrateSrcs {
   }
 }
 
-export type MainActions = CreateCrateSrcAction | GetCrateSrcs
+interface GetFileDirectories {
+  type: typeof GET_FILES_DIRECTORIES
+  payload: {
+    directorySrcs: FilesDirectory[]
+  }
+}
+
+export type MainActions = CreateCrateSrcAction | GetCrateSrcs | GetFileDirectories
 
 export interface MainContextProps {
   state: MainState
   dispatch: React.Dispatch<MainActions>
+}
+
+export type FileInfo = {
+  name: string
+  path: string
+  type: string
 }

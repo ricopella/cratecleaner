@@ -31,3 +31,12 @@ export const createFilesDirectory = async (
     return { success: false, error: (error as { message: string }).message }
   }
 }
+
+export const getFilesDirectories = async (): Promise<DatabaseOperationResult<FilesDirectory[]>> => {
+  try {
+    const directories = await prisma.filesDirectory.findMany()
+    return { success: true, data: directories }
+  } catch (error) {
+    return { success: false, error: (error as { message: string }).message }
+  }
+}

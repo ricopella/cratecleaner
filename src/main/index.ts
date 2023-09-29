@@ -5,6 +5,7 @@ import { join } from 'path'
 import icon from '../../resources/icon.png?asset'
 
 import { registerFileDialogHandler } from './handlers/dialogs'
+import { registerQueryHandler } from './handlers/queries'
 
 function createWindow(): void {
   // Create the browser window.
@@ -54,6 +55,7 @@ app.whenReady().then(() => {
 
   // CUSTOM HANDLERS
   registerFileDialogHandler()
+  registerQueryHandler()
 
   createWindow()
 
