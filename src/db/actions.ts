@@ -28,6 +28,7 @@ export const createFilesDirectory = async (
     console.log({ directory })
     return { success: true, data: directory }
   } catch (error) {
+    console.error({ error })
     return { success: false, error: (error as { message: string }).message }
   }
 }

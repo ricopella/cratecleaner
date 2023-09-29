@@ -15,5 +15,5 @@ model CrateSrc {
 
 model FilesDirectory {
   id   Int    @id @default(autoincrement())
-  path String
+  path String @unique
 }

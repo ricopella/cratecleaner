@@ -5,8 +5,7 @@ import {
   GET_CRATE_SRCS,
   GET_DUPLICATES,
   GET_FILES_DIRECTORIES,
-  NEW_CRATE_SRC,
-  NEW_FILES_DIRECTORY
+  NEW_CRATE_SRC
 } from '@src/constants'
 import { DatabaseOperationResult } from '@src/types'
 
@@ -20,26 +19,16 @@ export const openFilesDirectoryDialog = (): void => {
   ipcRenderer.send(DIALOG_FILES_DIRECTORY)
 }
 
-export type CallBack = (path: string) => void
+export type CallBack<T> = (arg: T) => void
 
-export const listenForSelectDirectory = (callback: CallBack): void => {
+export const listenForSelectDirectory = (callback: CallBack<string>): void => {
   ipcRenderer.on(NEW_CRATE_SRC, (_: unknown, path: string) => {
     callback(path)
   })
 }
 
-export const removeSelectDirectoryListener = (callback: CallBack): void => {
+export const removeSelectDirectoryListener = (callback: CallBack<string>): void => {
   ipcRenderer.removeListener(NEW_CRATE_SRC, callback)
-}
-
-export const listenForSelectFilesDirectory = (callback: CallBack): void => {
-  ipcRenderer.on(NEW_FILES_DIRECTORY, (_: unknown, path: string) => {
-    callback(path)
-  })
-}
-
-export const removeSelectFilesDirectoryListener = (callback: CallBack): void => {
-  ipcRenderer.removeListener(NEW_FILES_DIRECTORY, callback)
 }
 
 export const getCrateSrcs = async (): Promise<DatabaseOperationResult<CrateSrc[]>> => {

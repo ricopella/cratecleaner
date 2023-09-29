@@ -15,7 +15,7 @@ export const registerFileDialogHandler = (): void => {
 
     if (!result.canceled && result.filePaths.length > 0) {
       await createCrateSrc(result.filePaths[0])
-      // TODO: support multiple files & try/catch
+      // TODO: support multiple files
       event.sender.send(NEW_CRATE_SRC, result.filePaths[0])
     }
   })
@@ -26,9 +26,10 @@ export const registerFileDialogHandler = (): void => {
     })
 
     if (!result.canceled && result.filePaths.length > 0) {
-      // TODO: support multiple directories & try/catch
-      await createFilesDirectory(result.filePaths[0])
-      event.sender.send(NEW_FILES_DIRECTORY, result.filePaths[0])
+      // TODO: support multiple directories
+      const newDirectory = await createFilesDirectory(result.filePaths[0])
+      console.log({ newDirectory })
+      event.sender.send(NEW_FILES_DIRECTORY, newDirectory)
     }
   })
 }

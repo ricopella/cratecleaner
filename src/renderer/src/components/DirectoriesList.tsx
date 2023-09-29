@@ -1,70 +1,91 @@
-import { GET_FILES_DIRECTORIES } from '@src/constants'
-import { useEffect } from 'react'
+import { GET_FILES_DIRECTORIES, NEW_FILES_DIRECTORY } from '@src/constants'
+import { useEffect, useState } from 'react'
 
+import { FilesDirectory } from '@prisma/client'
 import { useMain } from '@renderer/actions/context'
-import {
-  CallBack,
-  getFilesDirectories,
-  listenForSelectFilesDirectory,
-  openFilesDirectoryDialog,
-  removeSelectFilesDirectoryListener
-} from '@renderer/actions/ipc'
+import { getFilesDirectories, openFilesDirectoryDialog } from '@renderer/actions/ipc'
+import { useFetchAndDispatch } from '@renderer/hooks/useFetchAndDispatch'
+import { useIpcListener } from '@renderer/hooks/useIPCListener'
+import { DatabaseOperationResult } from '@src/types'
 
-const callback: CallBack = (path: string) => {
-  console.log(`You selected: ${path}`)
+export const useFetchDirectories = (): {
+  fetchData: () => void
+  status: string
+  reset: () => void
+  message: string | null
+} => {
+  const { dispatch } = useMain()
+
+  const fetchFn = getFilesDirectories
+  const dispatchFn = (data: FilesDirectory[]): void => {
+    dispatch({
+      type: GET_FILES_DIRECTORIES,
+      payload: {
+        directorySrcs: data
+      }
+    })
+  }
+
+  const { fetchData, status, reset, message } = useFetchAndDispatch(fetchFn, dispatchFn)
+
+  return { fetchData, status, reset, message }
 }
 
-export const useListenForSelectDirectory = (): void => {
-  useEffect(() => {
-    listenForSelectFilesDirectory(callback)
-
-    return () => {
-      removeSelectFilesDirectoryListener(callback)
-    }
-  }, [callback])
-}
-
-export const useFetchCrateSrcs = (): void => {
+function DirectoriesList(): JSX.Element {
   const { state, dispatch } = useMain()
-  const crates = state.crateSrcs
+  const [error, setError] = useState<string | null>(null)
+
+  const { status, reset, fetchData, message } = useFetchDirectories()
+  useIpcListener(NEW_FILES_DIRECTORY, (res: DatabaseOperationResult<FilesDirectory>) => {
+    if (res.success === false) {
+      setError(res.error)
+      return
+    }
+
+    dispatch({
+      type: NEW_FILES_DIRECTORY,
+      payload: {
+        directorySrc: res.data
+      }
+    })
+  })
 
   useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      // TODO: add error handling and loading states
-      const fileDirs = await getFilesDirectories()
-
-      dispatch({
-        type: GET_FILES_DIRECTORIES,
-        payload: {
-          directorySrcs: fileDirs.success ? fileDirs.data : []
-        }
-      })
-    }
-
-    if ((crates || []).length === 0) {
-      fetchData()
-    }
-  }, [crates, dispatch])
-}
-
-function App(): JSX.Element {
-  const { state } = useMain()
-
-  useListenForSelectDirectory()
-  useFetchCrateSrcs()
+    fetchData()
+  }, [])
 
   const directories = state.directorySrcs
+
+  const renderList = (): JSX.Element => {
+    if (status === 'loading') {
+      return <div>Loading...</div>
+    }
+
+    if (status === 'error' || error) {
+      return (
+        <div>
+          {/* TODO: need to refactor as this try again calls wrong function */}
+          <button onClick={reset}>Try again</button>
+          <div>{message ?? error ?? ''}</div>
+        </div>
+      )
+    }
+
+    return (
+      <div>
+        {(directories || []).map((directory) => (
+          <div key={directory.id}>{directory.path}</div>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="container">
       <button onClick={openFilesDirectoryDialog}>Set Directory Path</button>
-      {(directories || []).map((crate) => (
-        <div className="text-2xl" key={crate.id}>
-          {crate.path}
-        </div>
-      ))}
+      {renderList()}
     </div>
   )
 }
 
-export default App
+export default DirectoriesList
