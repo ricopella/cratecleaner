@@ -1,10 +1,10 @@
 import { FilesDirectory } from '@prisma/client'
 import { useMain } from '@renderer/actions/context'
-import { getFilesDirectories, openFilesDirectoryDialog } from '@renderer/actions/ipc'
-import { useFetchAndDispatch } from '@renderer/hooks/useFetchAndDispatch'
-
+import { openFilesDirectoryDialog, removeDirectories } from '@renderer/actions/ipc'
+import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
+import useFetchDirectories from '@renderer/hooks/useDirectoriesList'
 import { useIpcListener } from '@renderer/hooks/useIPCListener'
-import { GET_FILES_DIRECTORIES, NEW_FILES_DIRECTORY } from '@src/constants'
+import { NEW_FILES_DIRECTORY, REMOVE_DIRECTORIES } from '@src/constants'
 import { DatabaseOperationResult } from '@src/types'
 import {
   createColumnHelper,
@@ -12,33 +12,20 @@ import {
   getCoreRowModel,
   useReactTable
 } from '@tanstack/react-table'
-import { HTMLProps, useEffect, useRef, useState } from 'react'
+import { isEmpty, keys } from 'ramda'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 
 const classNames = {
   container: 'h-full w-full grid grid-rows-max-1fr-max',
   btn: 'btn btn-sm',
-  table: 'table table-xs'
+  table: 'table table-xs',
+  actionRow: 'grid grid-cols-max-max-1fr',
+  errorContainer: 'bg-error-100 p-2 rounded',
+  errorText: 'text-sm text-error'
 }
-
-function IndeterminateCheckbox({
-  indeterminate,
-  className = '',
-  ...rest
-}: { indeterminate?: boolean } & HTMLProps<HTMLInputElement>): JSX.Element {
-  const ref = useRef<HTMLInputElement>(null!)
-
-  useEffect(() => {
-    if (typeof indeterminate === 'boolean') {
-      ref.current.indeterminate = !rest.checked && indeterminate
-    }
-  }, [ref, indeterminate])
-
-  return <input type="checkbox" ref={ref} className={className + ' cursor-pointer'} {...rest} />
-}
-
 const columnHelper = createColumnHelper<FilesDirectory>()
 
-const defaultColumns = [
+const columns = [
   columnHelper.display({
     id: 'select',
     header: ({ table }) => (
@@ -63,16 +50,9 @@ const defaultColumns = [
       </div>
     )
   }),
-  // columnHelper.display({
-  //   id: 'fileDirectory',
-  //   // accessorFn: row => row.path,
-  //   cell: (info) => {
-  //     const { path } = info.getValue()
-  //     const parts = path.split('/')
-  //     return parts[parts.length - 2]
-  //   },
-  //   header: (p) => <span>Directory</span>
-  // }),
+  columnHelper.accessor('id', {
+    id: 'id'
+  }),
   columnHelper.accessor('path', {
     id: 'path',
     cell: (info) => info.getValue(),
@@ -80,33 +60,15 @@ const defaultColumns = [
   })
 ]
 
-export const useFetchDirectories = (): {
-  fetchData: () => void
-  status: string
-  reset: () => void
-  message: string | null
-} => {
-  const { dispatch } = useMain()
-
-  const fetchFn = getFilesDirectories
-  const dispatchFn = (data: FilesDirectory[]): void => {
-    dispatch({
-      type: GET_FILES_DIRECTORIES,
-      payload: {
-        directorySrcs: data
-      }
-    })
-  }
-
-  const { fetchData, status, reset, message } = useFetchAndDispatch(fetchFn, dispatchFn)
-
-  return { fetchData, status, reset, message }
-}
-
-const List = (): JSX.Element => {
+const List = ({
+  rowSelection,
+  setRowSelection
+}: {
+  rowSelection: Record<string, boolean>
+  setRowSelection: Dispatch<SetStateAction<Record<string, boolean>>>
+}): JSX.Element => {
   const { state, dispatch } = useMain()
   const [error, setError] = useState<string | null>(null) // create directory error
-  const [rowSelection, setRowSelection] = useState({})
 
   const { status, reset, fetchData, message } = useFetchDirectories()
   useIpcListener(NEW_FILES_DIRECTORY, (res: DatabaseOperationResult<FilesDirectory>) => {
@@ -131,9 +93,12 @@ const List = (): JSX.Element => {
 
   const table = useReactTable({
     data: directories ?? [],
-    columns: defaultColumns,
+    columns,
     getCoreRowModel: getCoreRowModel(),
     state: {
+      columnVisibility: {
+        id: false
+      },
       rowSelection
     },
     enableRowSelection: true,
@@ -206,15 +171,54 @@ const List = (): JSX.Element => {
 }
 
 export default function Directories(): JSX.Element {
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
+  const [error, setError] = useState<string | null>(null) // remove directory error
+  const { dispatch, state } = useMain()
+
+  const handleRemoveDirectories = async (): Promise<void> => {
+    const rowsToDelete = keys(rowSelection)
+    const deleteKeys: string[] = state.directorySrcs.reduce((prev: string[], directory, i) => {
+      if (rowsToDelete.includes(i.toString())) {
+        prev.push(directory.id)
+      }
+      return prev
+    }, [])
+
+    const res = await removeDirectories(deleteKeys)
+
+    if (res.success === false) {
+      setError(res.error)
+      return
+    }
+
+    dispatch({
+      type: REMOVE_DIRECTORIES,
+      payload: {
+        ids: deleteKeys
+      }
+    })
+
+    setRowSelection({})
+  }
+
   return (
     <div className={classNames.container}>
       <div>One</div>
-      <List />
-      <div>
+      <List rowSelection={rowSelection} setRowSelection={setRowSelection} />
+      <div className={classNames.actionRow}>
         <button onClick={openFilesDirectoryDialog} className={classNames.btn}>
           +
         </button>
-        <button className={classNames.btn}>-</button>
+        <button
+          disabled={isEmpty(rowSelection)}
+          className={`${classNames.btn} ${isEmpty(rowSelection) ? 'btn-disabled' : ''}`}
+          onClick={handleRemoveDirectories}
+        >
+          -
+        </button>
+        <div className={classNames.errorContainer}>
+          {error && <div className={classNames.errorText}>{error}</div>}
+        </div>
       </div>
     </div>
   )

@@ -5,7 +5,8 @@ import {
   GET_CRATE_SRCS,
   GET_DUPLICATES,
   GET_FILES_DIRECTORIES,
-  NEW_CRATE_SRC
+  NEW_CRATE_SRC,
+  REMOVE_DIRECTORIES
 } from '@src/constants'
 import { DatabaseOperationResult } from '@src/types'
 
@@ -54,6 +55,18 @@ export const getFilesDirectories = async (): Promise<DatabaseOperationResult<Fil
 export const getDuplicates = async (): Promise<DatabaseOperationResult<string[]>> => {
   try {
     const result = await ipcRenderer.invoke(GET_DUPLICATES)
+    return result
+  } catch (error) {
+    console.error({ error })
+    return { success: false, error: (error as { message: string }).message }
+  }
+}
+
+export const removeDirectories = async (
+  directories: string[]
+): Promise<DatabaseOperationResult<boolean>> => {
+  try {
+    const result = await ipcRenderer.invoke(REMOVE_DIRECTORIES, directories)
     return result
   } catch (error) {
     console.error({ error })

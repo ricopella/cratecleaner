@@ -46,3 +46,14 @@ export const getFilesDirectories = async (): Promise<DatabaseOperationResult<Fil
     return { success: false, error: (error as { message: string }).message }
   }
 }
+
+export const removeDirectories = async (
+  directories: string[]
+): Promise<DatabaseOperationResult<boolean>> => {
+  try {
+    await prisma.filesDirectory.deleteMany({ where: { id: { in: directories } } })
+    return { success: true, data: true }
+  } catch (err) {
+    return { success: false, error: (err as { message: string }).message }
+  }
+}

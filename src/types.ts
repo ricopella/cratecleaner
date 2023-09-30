@@ -3,7 +3,8 @@ import {
   CREATE_CRATE_SRC,
   GET_CRATE_SRCS,
   GET_FILES_DIRECTORIES,
-  NEW_FILES_DIRECTORY
+  NEW_FILES_DIRECTORY,
+  REMOVE_DIRECTORIES
 } from './constants'
 
 export type DatabaseOperationResult<T> =
@@ -43,11 +44,19 @@ interface NewFileDirectory {
   }
 }
 
+interface DeleteFileDirectories {
+  type: typeof REMOVE_DIRECTORIES
+  payload: {
+    ids: string[]
+  }
+}
+
 export type MainActions =
   | CreateCrateSrcAction
   | GetCrateSrcs
   | GetFileDirectories
   | NewFileDirectory
+  | DeleteFileDirectories
 
 export interface MainContextProps {
   state: MainState
