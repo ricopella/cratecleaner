@@ -6,7 +6,11 @@ module.exports = {
     themes: ['luxury']
   },
   theme: {
-    extend: {}
+    extend: {
+      gridTemplateRows: {
+        'max-1fr-max': 'max-content 1fr max-content'
+      }
+    }
   },
   plugins: [require('daisyui')]
 }

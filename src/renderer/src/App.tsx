@@ -1,15 +1,11 @@
 import { MainProvider } from './actions/context'
-import CratesList from './components/CratesList'
-import DirectoriesList from './components/DirectoriesList'
-import Duplicates from './components/Duplicates'
+import { SectionTabs } from './components/SectionTabs'
 
 function App(): JSX.Element {
   return (
     <MainProvider>
       <div data-theme="luxury">
-        <CratesList />
-        <DirectoriesList />
-        <Duplicates />
+        <SectionTabs />
       </div>
     </MainProvider>
   )
