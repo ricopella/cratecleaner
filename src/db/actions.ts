@@ -1,4 +1,4 @@
-import { CrateSrc, FilesDirectory } from '@prisma/client'
+import { CrateSrc, FilesDirectory, Prisma } from '@prisma/client'
 import { DatabaseOperationResult } from '@src/types'
 import { prisma } from './prismaClient'
 
@@ -28,7 +28,12 @@ export const createFilesDirectory = async (
     console.log({ directory })
     return { success: true, data: directory }
   } catch (error) {
-    console.error({ error })
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2002') {
+        return { success: false, error: 'Directory already exists' }
+      }
+    }
+
     return { success: false, error: (error as { message: string }).message }
   }
 }

@@ -6,7 +6,7 @@ import Duplicates from './components/Duplicates'
 function App(): JSX.Element {
   return (
     <MainProvider>
-      <div className="container">
+      <div data-theme="luxury">
         <CratesList />
         <DirectoriesList />
         <Duplicates />

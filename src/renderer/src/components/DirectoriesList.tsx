@@ -33,7 +33,7 @@ export const useFetchDirectories = (): {
 
 function DirectoriesList(): JSX.Element {
   const { state, dispatch } = useMain()
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null) // create directory error
 
   const { status, reset, fetchData, message } = useFetchDirectories()
   useIpcListener(NEW_FILES_DIRECTORY, (res: DatabaseOperationResult<FilesDirectory>) => {
@@ -61,10 +61,9 @@ function DirectoriesList(): JSX.Element {
       return <div>Loading...</div>
     }
 
-    if (status === 'error' || error) {
+    if (status === 'error') {
       return (
         <div>
-          {/* TODO: need to refactor as this try again calls wrong function */}
           <button onClick={reset}>Try again</button>
           <div>{message ?? error ?? ''}</div>
         </div>
@@ -84,6 +83,7 @@ function DirectoriesList(): JSX.Element {
     <div className="container">
       <button onClick={openFilesDirectoryDialog}>Set Directory Path</button>
       {renderList()}
+      {error && <div>{error}</div>}
     </div>
   )
 }

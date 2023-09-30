@@ -58,7 +58,9 @@ function App(): JSX.Element {
 
   return (
     <div className="container">
-      <button onClick={openCrateDialog}>Set Crate Path</button>
+      <button className="btn btn-primary" onClick={openCrateDialog}>
+        Set Crate Path
+      </button>
       {(crates || []).map((crate) => (
         <div className="text-2xl" key={crate.id}>
           {crate.path}
