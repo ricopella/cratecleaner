@@ -1,4 +1,5 @@
 import { openFilesDirectoryDialog, removeDirectories } from '@renderer/actions/ipc'
+import ErrorMessage from '@renderer/components/ErrorMessage'
 import { useMain } from '@renderer/context/MainContext'
 import { useTableContext } from '@renderer/context/TableContext'
 import { REMOVE_DIRECTORIES } from '@src/constants'
@@ -7,8 +8,7 @@ import { isEmpty, keys } from 'ramda'
 const classNames = {
   row: 'grid grid-cols-max-max-1fr gap-2',
   btn: 'btn btn-sm',
-  errorContainer: 'bg-base-200 p-2 rounded',
-  errorText: 'text-sm text-error'
+  errorContainer: 'bg-base-200 p-2 rounded'
 }
 
 export default function ActionsRow(): JSX.Element {
@@ -54,7 +54,7 @@ export default function ActionsRow(): JSX.Element {
         -
       </button>
       <div className={classNames.errorContainer}>
-        {error && <div className={classNames.errorText}>{error}</div>}
+        <ErrorMessage error={error} />
       </div>
     </div>
   )
