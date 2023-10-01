@@ -1,5 +1,7 @@
 import Directories from '@renderer/Sections/Directories'
 import Results from '@renderer/Sections/Results'
+import { useMain } from '@renderer/context/MainContext'
+import { keys } from 'ramda'
 import { useState } from 'react'
 
 const classNames = {
@@ -10,26 +12,36 @@ const classNames = {
 }
 
 export function SectionTabs(): JSX.Element {
-  const [activeTab, setActiveTab] = useState<'DIRECTORIES' | 'RESULTS'>('DIRECTORIES')
+  // Initialize activeTab to 'DIRECTORIES'
+  const [activeTab, setActiveTab] = useState<string>('DIRECTORIES')
+  const { state } = useMain()
+
+  const handleTabClick = (tabId: string) => {
+    setActiveTab(tabId)
+  }
 
   return (
     <div className={classNames.container}>
       <div className={classNames.tabs}>
         <a
           className={`${classNames.tab} ${activeTab === 'DIRECTORIES' ? 'tab-active' : ''}`}
-          onClick={(): void => setActiveTab('DIRECTORIES')}
+          onClick={(): void => handleTabClick('DIRECTORIES')}
         >
           Directories
         </a>
-        <a
-          className={`${classNames.tab} ${activeTab === 'RESULTS' ? 'tab-active' : ''}`}
-          onClick={(): void => setActiveTab('RESULTS')}
-        >
-          Results
-        </a>
+        {keys(state.scans).map((scanId) => (
+          <a
+            key={scanId}
+            className={`${classNames.tab} ${activeTab === scanId ? 'tab-active' : ''}`}
+            onClick={(): void => handleTabClick(scanId)}
+          >
+            {/* TODO: add remove tab button */}
+            Results
+          </a>
+        ))}
       </div>
       <div className={classNames.contentContainer}>
-        {activeTab === 'DIRECTORIES' ? <Directories /> : <Results />}
+        {activeTab === 'DIRECTORIES' ? <Directories /> : <Results id={activeTab} />}
       </div>
     </div>
   )

@@ -95,7 +95,8 @@ const List = (): JSX.Element => {
 
   const renderList = (): JSX.Element => {
     if (status === 'loading') {
-      return <span className="loading loading-bars loading-lg"></span>
+      // TODO: need to figure out loading
+      return <span>Loading...</span>
     }
 
     return (

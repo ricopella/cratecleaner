@@ -1,12 +1,13 @@
-import { openFilesDirectoryDialog, removeDirectories } from '@renderer/actions/ipc'
+import { insertScan, openFilesDirectoryDialog, removeDirectories } from '@renderer/actions/ipc'
 import ErrorMessage from '@renderer/components/ErrorMessage'
 import { useMain } from '@renderer/context/MainContext'
 import { useTableContext } from '@renderer/context/TableContext'
-import { REMOVE_DIRECTORIES } from '@src/constants'
+import { transformScan } from '@renderer/utils/transformScan'
+import { ADD_NEW_SCAN, REMOVE_DIRECTORIES } from '@src/constants'
 import { isEmpty, keys } from 'ramda'
 
 const classNames = {
-  row: 'grid grid-cols-max-max-1fr gap-2',
+  row: 'grid grid-cols-max-max-1fr-max gap-2',
   btn: 'btn btn-sm',
   errorContainer: 'bg-base-200 p-2 rounded'
 }
@@ -41,6 +42,31 @@ export default function ActionsRow(): JSX.Element {
     setRowSelection({})
   }
 
+  const handleNewScan = async (): Promise<void> => {
+    // insert new scan
+    const res = await insertScan({
+      directoryPaths: state.directorySrcs.map((directory) => directory.path)
+    })
+    if (res.success === false) {
+      setError(res.error)
+      return
+    }
+
+    // causing an error log bc the insert is not in right shape
+    const scan = transformScan(res.data)
+
+    // add scan ID to main state
+    dispatch({
+      type: ADD_NEW_SCAN,
+      payload: {
+        id: res.data.id,
+        scan
+      }
+    })
+
+    // TODO: set active tab to scan id
+  }
+
   return (
     <div className={classNames.row}>
       <button onClick={openFilesDirectoryDialog} className={classNames.btn}>
@@ -56,6 +82,9 @@ export default function ActionsRow(): JSX.Element {
       <div className={classNames.errorContainer}>
         <ErrorMessage error={error} />
       </div>
+      <button className={classNames.btn} onClick={handleNewScan}>
+        Scan
+      </button>
     </div>
   )
 }
