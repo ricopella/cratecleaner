@@ -63,6 +63,13 @@ export interface MainContextProps {
   dispatch: React.Dispatch<MainActions>
 }
 
+export interface TableContextProps {
+  rowSelection: Record<string, boolean>
+  setRowSelection: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
+  error: string | null
+  setError: React.Dispatch<React.SetStateAction<string | null>>
+}
+
 export type FileInfo = {
   name: string
   path: string

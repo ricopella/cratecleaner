@@ -1,5 +1,5 @@
-import { useMain } from '@renderer/actions/context'
 import { getDuplicates } from '@renderer/actions/ipc'
+import { useMain } from '@renderer/context/MainContext'
 
 export const useFetchCrateSrcs = (): void => {
   const { state, dispatch } = useMain()

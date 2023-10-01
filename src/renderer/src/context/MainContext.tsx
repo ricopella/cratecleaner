@@ -1,8 +1,7 @@
 import { MainContextProps } from '@src/types'
 import React, { ReactNode, createContext, useContext, useReducer } from 'react'
-import { directoryReducer, initialState } from './reducer'
+import { directoryReducer, initialState } from '../actions/reducer'
 
-// Create a context
 const MainContext = createContext<MainContextProps | null>(null)
 
 interface MainProviderProps {

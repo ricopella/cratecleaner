@@ -6,7 +6,7 @@ const classNames = {
   container: 'p-4 h-screen flex flex-col',
   tabs: 'tabs',
   tab: 'tab tab-lifted',
-  contentContainer: 'bg-base-200 h-full w-full p-4 rounded'
+  contentContainer: 'bg-base-300 h-full w-full p-4 rounded'
 }
 
 export function SectionTabs(): JSX.Element {

@@ -1,5 +1,5 @@
-import { MainProvider } from './actions/context'
 import { SectionTabs } from './components/SectionTabs'
+import { MainProvider } from './context/MainContext'
 
 function App(): JSX.Element {
   return (
