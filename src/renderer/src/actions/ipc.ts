@@ -6,6 +6,7 @@ import {
   GET_CRATE_SRCS,
   GET_DUPLICATES,
   GET_FILES_DIRECTORIES,
+  GET_SCANS_LIST,
   GET_SCAN_BY_ID,
   NEW_CRATE_SRC,
   REMOVE_DIRECTORIES
@@ -75,4 +76,10 @@ export const insertScan = (
   configuration: ScanConfiguration
 ): Promise<DatabaseOperationResult<Scan>> => {
   return invokeIPC<Scan, ScanConfiguration>(ADD_NEW_SCAN, configuration)
+}
+
+export const getScansList = (): Promise<
+  DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>
+> => {
+  return invokeIPC<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(GET_SCANS_LIST)
 }

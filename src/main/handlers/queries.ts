@@ -2,6 +2,7 @@ import {
   ADD_NEW_SCAN,
   GET_CRATE_SRCS,
   GET_FILES_DIRECTORIES,
+  GET_SCANS_LIST,
   GET_SCAN_BY_ID,
   REMOVE_DIRECTORIES
 } from '@src/constants'
@@ -10,6 +11,7 @@ import {
   getCrateSrcs,
   getFilesDirectories,
   getScanById,
+  getScansList,
   removeDirectories,
   updateScanById
 } from '@src/db/actions'
@@ -66,6 +68,12 @@ export const registerQueryHandler = (): void => {
 
   ipcMain.handle(GET_SCAN_BY_ID, async (_: unknown, scanId: string) => {
     const result = await getScanById(scanId)
+
+    return result
+  })
+
+  ipcMain.handle(GET_SCANS_LIST, async () => {
+    const result = await getScansList()
 
     return result
   })

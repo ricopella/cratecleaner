@@ -59,6 +59,8 @@ const List = (): JSX.Element => {
   const { rowSelection, setRowSelection, setError } = useTableContext()
 
   const { status, fetchData } = useFetchDirectories()
+
+  // TODO: look into: Possible EventEmitter memory leak detected. 11 NEW_FILES_DIRECTORY listeners added to [EventEmitter]. Use emitter.setMaxListeners() to increase limit
   useIpcListener(NEW_FILES_DIRECTORY, (res: DatabaseOperationResult<FilesDirectory>) => {
     if (res.success === false) {
       setError(res.error)

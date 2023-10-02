@@ -4,11 +4,15 @@ import {
   GET_FILES_DIRECTORIES,
   NEW_FILES_DIRECTORY,
   REMOVE_DIRECTORIES,
+  REMOVE_SCAN,
+  UPDATE_ACTIVE_TAB,
   UPDATE_SCAN_STATUS
 } from '@src/constants'
 import { MainActions, MainState } from '@src/types'
+import { dissoc } from 'ramda'
 
 export const initialState: MainState = {
+  activeTab: 'DIRECTORIES',
   crateSrcs: [],
   directorySrcs: [],
   scans: {}
@@ -55,7 +59,16 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
         }
       }
     }
-
+    case UPDATE_ACTIVE_TAB:
+      return {
+        ...state,
+        activeTab: action.payload.activeTab
+      }
+    case REMOVE_SCAN:
+      return {
+        ...state,
+        scans: dissoc(action.payload.id, state.scans)
+      }
     default:
       return state
   }

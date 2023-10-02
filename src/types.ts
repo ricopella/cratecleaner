@@ -7,6 +7,8 @@ import {
   GET_FILES_DIRECTORIES,
   NEW_FILES_DIRECTORY,
   REMOVE_DIRECTORIES,
+  REMOVE_SCAN,
+  UPDATE_ACTIVE_TAB,
   UPDATE_SCAN_STATUS
 } from './constants'
 
@@ -18,6 +20,7 @@ export type MainState = {
   crateSrcs: CrateSrc[]
   directorySrcs: FilesDirectory[]
   scans: Record<string, ExtendedScan>
+  activeTab: string // DIRECTORIES or uuid if result
 }
 
 export interface CreateCrateSrcAction {
@@ -68,6 +71,20 @@ interface UpdateScanStatus {
   payload: ExtendedScan
 }
 
+interface UpdateActiveTab {
+  type: typeof UPDATE_ACTIVE_TAB
+  payload: {
+    activeTab: string
+  }
+}
+
+interface RemoveScan {
+  type: typeof REMOVE_SCAN
+  payload: {
+    id: string
+  }
+}
+
 export type MainActions =
   | CreateCrateSrcAction
   | GetCrateSrcs
@@ -76,6 +93,8 @@ export type MainActions =
   | DeleteFileDirectories
   | AddNewScan
   | UpdateScanStatus
+  | UpdateActiveTab
+  | RemoveScan
 
 export interface MainContextProps {
   state: MainState
@@ -103,21 +122,21 @@ export const ScanConfigurationSchema = z.object({
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>
 
-export const ScanResultsSchema = z.union([
-  z.object({
-    files: z.record(
-      z.string(),
-      z.array(
-        z.object({
-          name: z.string(),
-          path: z.string(),
-          type: z.string()
-        })
-      )
-    )
-  }),
-  z.null()
-])
+const duplicateFile = z.object({
+  name: z.string(),
+  path: z.string(),
+  type: z.string()
+})
+
+export type DuplicateFile = z.infer<typeof duplicateFile>
+
+const resultsSchema = z.object({
+  files: z.record(z.string(), z.array(duplicateFile))
+})
+
+export const ScanResultsSchema = z.union([resultsSchema, z.null()])
+
+export type ScanResults = z.infer<typeof resultsSchema>
 
 export type ExtendedScan = Omit<Scan, 'results' | 'configuration'> & {
   results: z.infer<typeof ScanResultsSchema>

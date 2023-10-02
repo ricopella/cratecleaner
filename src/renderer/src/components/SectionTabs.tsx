@@ -1,24 +1,46 @@
 import Directories from '@renderer/Sections/Directories'
 import Results from '@renderer/Sections/Results'
 import { useMain } from '@renderer/context/MainContext'
+import { REMOVE_SCAN, UPDATE_ACTIVE_TAB } from '@src/constants'
 import { keys } from 'ramda'
-import { useState } from 'react'
+import { useMemo } from 'react'
 
 const classNames = {
-  container: 'p-4 h-screen flex flex-col',
+  container: 'h-screen p-4 grid grid-rows-max-1fr',
   tabs: 'tabs',
   tab: 'tab tab-lifted',
-  contentContainer: 'bg-base-300 h-full w-full p-4 rounded'
+  contentContainer: 'bg-base-300 h-full w-full rounded overflow-hidden'
 }
 
 export function SectionTabs(): JSX.Element {
-  // Initialize activeTab to 'DIRECTORIES'
-  const [activeTab, setActiveTab] = useState<string>('DIRECTORIES')
-  const { state } = useMain()
-
-  const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId)
+  const { state, dispatch } = useMain()
+  console.log({ state })
+  const handleTabClick = (tabId: string): void => {
+    dispatch({
+      type: UPDATE_ACTIVE_TAB,
+      payload: {
+        activeTab: tabId
+      }
+    })
   }
+
+  const handleRemoveTab = (tabId: string): void => {
+    dispatch({
+      type: UPDATE_ACTIVE_TAB,
+      payload: {
+        activeTab: 'DIRECTORIES'
+      }
+    })
+
+    dispatch({
+      type: REMOVE_SCAN,
+      payload: {
+        id: tabId
+      }
+    })
+  }
+
+  const activeTab = useMemo(() => state.activeTab, [state.activeTab])
 
   return (
     <div className={classNames.container}>
@@ -35,7 +57,17 @@ export function SectionTabs(): JSX.Element {
             className={`${classNames.tab} ${activeTab === scanId ? 'tab-active' : ''}`}
             onClick={(): void => handleTabClick(scanId)}
           >
-            {/* TODO: add remove tab button */}
+            <button
+              onClick={(e): void => {
+                e.preventDefault()
+                e.stopPropagation()
+
+                handleRemoveTab(scanId)
+              }}
+              className="mr-2"
+            >
+              x
+            </button>
             Results
           </a>
         ))}

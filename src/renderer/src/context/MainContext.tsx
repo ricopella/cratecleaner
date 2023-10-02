@@ -19,15 +19,18 @@ export const MainProvider: React.FC<MainProviderProps> = ({ children }) => {
 
     Object.keys(state.scans).forEach((id) => {
       const scan = state.scans[id]
-      const currentTime = new Date().getTime()
-      const createdAtTime = new Date(scan.createdAt).getTime()
-      const timeDifference = (currentTime - createdAtTime) / (1000 * 60)
+
+      // TODO: fix this - will not work when referencing older scans
+      // const currentTime = new Date().getTime()
+      // const createdAtTime = new Date(scan.createdAt).getTime()
+      // const timeDifference = (currentTime - createdAtTime) / (1000 * 60)
 
       // do not poll if scan is not pending or if it's been more than 5 minutes
-      if (scan.status === 'pending' && timeDifference <= 5) {
+      if (scan.status === 'pending') {
         const intervalId = setInterval(async () => {
           // Fetch the latest status from your backend
           const scanRes = await fetchScanStatusById(id)
+          console.log({ scanRes })
 
           if (scanRes.success === false) {
             clearInterval(intervalId)

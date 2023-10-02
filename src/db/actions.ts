@@ -68,3 +68,18 @@ export const updateScanById = async (
     prisma.scan.update({ where: { id }, data: { status, results } })
   )
 }
+
+export const getScansList = (): Promise<DatabaseOperationResult<Scan[]>> => {
+  return performDatabaseOperation<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(() =>
+    prisma.scan.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        status: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+  )
+}
