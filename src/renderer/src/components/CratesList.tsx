@@ -1,7 +1,6 @@
 import { GET_CRATE_SRCS } from '@src/constants'
 import { useEffect } from 'react'
 
-import { useMain } from '@renderer/actions/context'
 import {
   CallBack,
   getCrateSrcs,
@@ -9,6 +8,7 @@ import {
   openCrateDialog,
   removeSelectDirectoryListener
 } from '@renderer/actions/ipc'
+import { useMain } from '@renderer/context/MainContext'
 
 const callback: CallBack = (path: string) => {
   console.log(`You selected: ${path}`)

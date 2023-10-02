@@ -8,12 +8,21 @@ datasource db {
 }
 
 model CrateSrc {
-  id   Int    @id @default(autoincrement())
+  id   String @id @default(uuid())
   path String
   type String
 }
 
 model FilesDirectory {
-  id   Int    @id @default(autoincrement())
+  id   String @id @default(uuid())
   path String @unique
+}
+
+model Scan {
+  id            String   @id @default(uuid()) @map("id")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  configuration String
+  status        String   @default("pending")
+  results       String? // Nullable since results are not available until scan is complete
 }

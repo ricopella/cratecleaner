@@ -1,9 +1,17 @@
-import { GET_CRATE_SRCS, GET_FILES_DIRECTORIES, NEW_FILES_DIRECTORY } from '@src/constants'
+import {
+  ADD_NEW_SCAN,
+  GET_CRATE_SRCS,
+  GET_FILES_DIRECTORIES,
+  NEW_FILES_DIRECTORY,
+  REMOVE_DIRECTORIES,
+  UPDATE_SCAN_STATUS
+} from '@src/constants'
 import { MainActions, MainState } from '@src/types'
 
 export const initialState: MainState = {
   crateSrcs: [],
-  directorySrcs: []
+  directorySrcs: [],
+  scans: {}
 }
 
 export function directoryReducer(state: MainState, action: MainActions): MainState {
@@ -20,6 +28,34 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
         ...state,
         directorySrcs: [...state.directorySrcs, action.payload.directorySrc]
       }
+    case REMOVE_DIRECTORIES:
+      return {
+        ...state,
+        directorySrcs: state.directorySrcs.filter(
+          (directorySrc) => !action.payload.ids.includes(directorySrc.id)
+        )
+      }
+    case ADD_NEW_SCAN:
+      return {
+        ...state,
+        scans: {
+          ...state.scans,
+          [action.payload.id]: action.payload.scan
+        }
+      }
+    case UPDATE_SCAN_STATUS: {
+      return {
+        ...state,
+        scans: {
+          ...state.scans,
+          [action.payload.id]: {
+            ...state.scans[action.payload.id],
+            ...action.payload
+          }
+        }
+      }
+    }
+
     default:
       return state
   }

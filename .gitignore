@@ -2,3 +2,5 @@ node_modules
 dist
 out
 *.log*
+prisma/dev.db
+yarn.lock

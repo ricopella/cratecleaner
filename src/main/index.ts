@@ -30,6 +30,15 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.webContents.openDevTools()
+
+    // Enable right-click context menu to inspect element
+    mainWindow.webContents.on('context-menu', (_, params) => {
+      mainWindow.webContents.inspectElement(params.x, params.y)
+    })
+  }
+
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
