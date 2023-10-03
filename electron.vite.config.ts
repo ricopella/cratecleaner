@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import { resolve } from 'path'
+import Svgr from 'vite-plugin-svgr'
 
 export default defineConfig({
   main: {
@@ -26,6 +27,6 @@ export default defineConfig({
         '@src': resolve(__dirname, 'src')
       }
     },
-    plugins: [react()]
+    plugins: [react(), Svgr()]
   }
 })

@@ -142,3 +142,9 @@ export type ExtendedScan = Omit<Scan, 'results' | 'configuration'> & {
   results: z.infer<typeof ScanResultsSchema>
   configuration: z.infer<typeof ScanConfigurationSchema>
 }
+
+export type ResultsData = {
+  id: string
+  name: string
+  files: DuplicateFile[]
+}

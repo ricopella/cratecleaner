@@ -1,33 +1,33 @@
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
-import { DuplicateFile, ScanResults } from '@src/types'
+import { ResultsData, ScanResults } from '@src/types'
 import {
   ExpandedState,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   useReactTable
 } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
+import ArrowRight from '../../assets/arrow-right.svg?react'
+import TableBody from './TableBody'
+import TableHeader from './TableHeader'
+import { transformScanResultsToRows } from './utils'
 
 const classNames = {
   container: 'h-full w-full grid grid-rows-max-1fr ',
   table: 'table table-xs',
-  tableContainer: 'h-full w-full overflow-y-scroll overflow-x-scroll'
+  tableContainer: 'h-full w-full overflow-y-scroll'
 }
 
-const columnHelper = createColumnHelper<{
-  id: string
-  name: string
-  files: DuplicateFile[]
-}>()
+const columnHelper = createColumnHelper<ResultsData>()
 
-// Define columns
 const columns = [
   columnHelper.accessor('id', {
     id: 'id',
     enableGrouping: true,
-    cell: ({ row, getValue }) => (
+    size: 24,
+    header: undefined,
+    cell: ({ row }) => (
       <div
         style={{
           paddingLeft: `${row.depth * 2}rem`
@@ -36,33 +36,29 @@ const columns = [
         <>
           {row.depth === 0 ? (
             <>
-              {/* This is a parent row */}
-              <IndeterminateCheckbox
-                {...{
-                  checked: row.getIsSelected(),
-                  indeterminate: row.getIsSomeSelected(),
-                  onChange: row.getToggleSelectedHandler()
-                }}
-              />{' '}
               {row.getCanExpand() ? (
                 <button
+                  className="btn btn-ghost btn-xs rounded-btn"
                   {...{
-                    onClick: row.getToggleExpandedHandler(),
-                    style: { cursor: 'pointer' }
+                    onClick: row.getToggleExpandedHandler()
                   }}
                 >
-                  {row.getIsExpanded() ? '👇' : '👉'}
+                  {row.getIsExpanded() ? (
+                    <ArrowRight className="w-4 h-4 text-accent-content fill-current transform rotate-90" />
+                  ) : (
+                    <ArrowRight className="w-4 h-4 text-accent-content fill-current" />
+                  )}
                 </button>
-              ) : (
-                '🔵'
-              )}{' '}
-              {getValue()} (Dupe Count: {row.original.files.length})
+              ) : null}
             </>
           ) : (
-            <>
-              {/* This is a child row */}
-              File Path: {row.original.path}, File Type: {row.original.type}
-            </>
+            <IndeterminateCheckbox
+              {...{
+                checked: row.getIsSelected(),
+                indeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler()
+              }}
+            />
           )}
         </>
       </div>
@@ -72,18 +68,21 @@ const columns = [
     cell: (info) => info.getValue(),
     enableGrouping: false
   }),
-  columnHelper.display({
-    id: 'duplicateCount',
-    header: () => <span>Dupe Count</span>,
-    cell: ({ row }) => row.original.files.length,
-    enableGrouping: false
-  }),
+
   columnHelper.accessor('path', {
     cell: (info) => info.getValue(),
     enableGrouping: false
   }),
   columnHelper.accessor('type', {
     cell: (info) => info.getValue(),
+    enableGrouping: false,
+    size: 32
+  }),
+  columnHelper.display({
+    id: 'duplicateCount',
+    size: 24,
+    header: () => <span>Dupe Count</span>,
+    cell: ({ row }) => row.original.files.length,
     enableGrouping: false
   })
 ]
@@ -93,27 +92,12 @@ export default function Results({ id }: { id: string }): JSX.Element {
   const results: ScanResults = scan.results ?? { files: {} }
   const [expanded, setExpanded] = useState<ExpandedState>({})
 
-  console.log({ expanded })
-  // Prepare data
-  const data = useMemo(() => {
-    // Flatten your results object into an array for react-table
-    // Add the hash ID to each row
-    return Object.entries(results.files).map(([parentId, files]) => {
-      return {
-        id: parentId,
-        name: files[0].name,
-        files
-      }
-    })
+  const data: ResultsData[] = useMemo(() => {
+    return transformScanResultsToRows(results)
   }, [results])
-  console.log({ data })
 
   // Create an instance of the table
-  const table = useReactTable<{
-    id: string
-    name: string
-    files: DuplicateFile[]
-  }>({
+  const table = useReactTable<ResultsData>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -130,7 +114,8 @@ export default function Results({ id }: { id: string }): JSX.Element {
     state: {
       expanded
     },
-    debugTable: true
+    debugTable: true,
+    columnResizeMode: 'onChange'
   })
 
   return (
@@ -138,126 +123,8 @@ export default function Results({ id }: { id: string }): JSX.Element {
       <div>Configuration</div>
       <div className={classNames.tableContainer}>
         <table className={classNames.table}>
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      style={{
-                        width: header.getSize()
-                      }}
-                    >
-                      {header.isPlaceholder ? null : (
-                        <div>
-                          {header.column.getCanGroup() ? (
-                            // If the header can be grouped, let's add a toggle
-                            <button
-                              {...{
-                                onClick: header.column.getToggleGroupingHandler(),
-                                style: {
-                                  cursor: 'pointer'
-                                }
-                              }}
-                            >
-                              {header.column.getIsGrouped()
-                                ? `🛑(${header.column.getGroupedIndex()}) `
-                                : `👊 `}
-                            </button>
-                          ) : null}{' '}
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                        </div>
-                      )}
-                      {/* TODO: create resizer component */}
-                      <div
-                        {...{
-                          onMouseDown: header.getResizeHandler(),
-                          onTouchStart: header.getResizeHandler(),
-                          className: `resizer ${header.column.getIsResizing() ? 'isResizing' : ''}`
-                        }}
-                      />
-                    </th>
-                  )
-                })}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => {
-              return (
-                // <tr key={row.id}>
-                //   {row.getVisibleCells().map((cell) => {
-                //     return (
-                //       <td
-                //         key={cell.id}
-                //         {
-                //           ...{
-                //             // style: {
-                //             //   background: cell.getIsGrouped()
-                //             //     ? '#0aff0082'
-                //             //     : cell.getIsAggregated()
-                //             //     ? '#ffa50078'
-                //             //     : cell.getIsPlaceholder()
-                //             //     ? '#ff000042'
-                //             //     : 'white'
-                //             // }
-                //           }
-                //         }
-                //       >
-                //         {cell.getIsGrouped() ? (
-                //           // If it's a grouped cell, add an expander and row count
-                //           <>
-                //             <button
-                //               {...{
-                //                 onClick: row.getToggleExpandedHandler(),
-                //                 style: {
-                //                   cursor: row.getCanExpand() ? 'pointer' : 'normal'
-                //                 }
-                //               }}
-                //             >
-                //               {row.getIsExpanded() ? '👇' : '👉'}{' '}
-                //               {flexRender(cell.column.columnDef.cell, cell.getContext())} (
-                //               {row.subRows.length})
-                //             </button>
-                //           </>
-                //         ) : cell.getIsPlaceholder() ? null : ( // For cells with repeated values, render null
-                //           // Otherwise, just render the regular cell
-                //           flexRender(cell.column.columnDef.cell, cell.getContext())
-                //         )}
-                //       </td>
-                //     )
-                //   })}
-                // </tr>
-                <>
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td key={cell.id}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </td>
-                      )
-                    })}
-                  </tr>
-                  {row.getIsExpanded() &&
-                    row.subRows.map((subRow) => {
-                      return (
-                        <tr key={subRow.id}>
-                          {subRow.getVisibleCells().map((cell) => {
-                            return (
-                              <td key={cell.id}>
-                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                              </td>
-                            )
-                          })}
-                        </tr>
-                      )
-                    })}
-                </>
-              )
-            })}
-          </tbody>
+          <TableHeader table={table} />
+          <TableBody table={table} />
         </table>
       </div>
     </div>

@@ -9,12 +9,12 @@ const classNames = {
   container: 'h-screen p-4 grid grid-rows-max-1fr',
   tabs: 'tabs',
   tab: 'tab tab-lifted',
-  contentContainer: 'bg-base-300 h-full w-full rounded overflow-hidden'
+  contentContainer: 'bg-base-300 h-full w-full rounded overflow-hidden p-4'
 }
 
 export function SectionTabs(): JSX.Element {
   const { state, dispatch } = useMain()
-  console.log({ state })
+
   const handleTabClick = (tabId: string): void => {
     dispatch({
       type: UPDATE_ACTIVE_TAB,
