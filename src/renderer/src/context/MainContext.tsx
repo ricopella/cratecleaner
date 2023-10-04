@@ -1,7 +1,9 @@
+import { FilesDirectory } from '@prisma/client'
 import { fetchScanStatusById } from '@renderer/actions/ipc'
+import { useIpcListener } from '@renderer/hooks/useIPCListener'
 import { transformScan } from '@renderer/utils/transformScan'
-import { UPDATE_SCAN_STATUS } from '@src/constants'
-import { MainContextProps } from '@src/types'
+import { NEW_FILES_DIRECTORY, UPDATE_SCAN_STATUS } from '@src/constants'
+import { DatabaseOperationResult, MainContextProps } from '@src/types'
 import React, { ReactNode, createContext, useContext, useEffect, useReducer } from 'react'
 import { directoryReducer, initialState } from '../actions/reducer'
 
@@ -13,6 +15,22 @@ interface MainProviderProps {
 
 export const MainProvider: React.FC<MainProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(directoryReducer, initialState)
+  console.log('state')
+  useIpcListener(NEW_FILES_DIRECTORY, (res: DatabaseOperationResult<FilesDirectory>) => {
+    if (res.success === false) {
+      //  TODO:move error to this state
+      // setError(res.error)
+
+      return
+    }
+
+    dispatch({
+      type: NEW_FILES_DIRECTORY,
+      payload: {
+        directorySrc: res.data
+      }
+    })
+  })
 
   useEffect(() => {
     const intervalIds: NodeJS.Timeout[] = []

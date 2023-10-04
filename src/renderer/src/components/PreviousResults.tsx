@@ -16,7 +16,10 @@ export default function PreviousResults(): JSX.Element {
 
   return (
     <div className={classNames.dropdown}>
-      <label tabIndex={0} className={classNames.btn}>
+      <label
+        tabIndex={0}
+        className={`${classNames.btn} ${list.length === 0 ? 'btn-disabled' : ''}`}
+      >
         Previous Results
       </label>
       <ul tabIndex={0} className={classNames.ul}>
@@ -28,10 +31,13 @@ export default function PreviousResults(): JSX.Element {
                 type: 'ADD_NEW_SCAN',
                 payload: {
                   id: scan.id,
-                  // TODO: fix type
                   scan: {
                     ...scan,
-                    status: 'pending' // to have polling query for finished scan TODO: consider changing logic
+                    status: 'pending', // to have polling query for finished scan TODO: consider changing logic
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    results: { files: {} },
+                    configuration: { directoryPaths: [] }
                   }
                 }
               })

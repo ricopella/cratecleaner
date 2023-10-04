@@ -1,4 +1,4 @@
-import { SectionTabs } from './components/SectionTabs'
+import SectionTabs from './components/SectionTabs'
 import { MainProvider } from './context/MainContext'
 
 function App(): JSX.Element {

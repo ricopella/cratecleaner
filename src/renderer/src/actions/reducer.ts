@@ -9,7 +9,7 @@ import {
   UPDATE_SCAN_STATUS
 } from '@src/constants'
 import { MainActions, MainState } from '@src/types'
-import { dissoc } from 'ramda'
+import { dissoc, uniq } from 'ramda'
 
 export const initialState: MainState = {
   activeTab: 'DIRECTORIES',
@@ -30,7 +30,7 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
     case NEW_FILES_DIRECTORY:
       return {
         ...state,
-        directorySrcs: [...state.directorySrcs, action.payload.directorySrc]
+        directorySrcs: uniq([...state.directorySrcs, action.payload.directorySrc])
       }
     case REMOVE_DIRECTORIES:
       return {

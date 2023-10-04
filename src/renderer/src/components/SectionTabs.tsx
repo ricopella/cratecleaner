@@ -3,7 +3,7 @@ import Results from '@renderer/Sections/Results'
 import { useMain } from '@renderer/context/MainContext'
 import { REMOVE_SCAN, UPDATE_ACTIVE_TAB } from '@src/constants'
 import { keys } from 'ramda'
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 
 const classNames = {
   container: 'h-screen p-4 grid grid-rows-max-1fr',
@@ -12,7 +12,7 @@ const classNames = {
   contentContainer: 'bg-base-300 h-full w-full rounded overflow-hidden p-4'
 }
 
-export function SectionTabs(): JSX.Element {
+function SectionTabs(): JSX.Element {
   const { state, dispatch } = useMain()
 
   const handleTabClick = (tabId: string): void => {
@@ -78,3 +78,5 @@ export function SectionTabs(): JSX.Element {
     </div>
   )
 }
+
+export default memo(SectionTabs)
