@@ -1,4 +1,4 @@
-import { CrateSrc, FilesDirectory, Prisma, Scan } from '@prisma/client'
+import { CrateSrc, DeletedFiles, FilesDirectory, Prisma, Scan } from '@prisma/client'
 import { DatabaseOperationResult, ScanConfiguration } from '@src/types'
 import { prisma } from './prismaClient'
 
@@ -69,7 +69,9 @@ export const updateScanById = async (
   )
 }
 
-export const getScansList = (): Promise<DatabaseOperationResult<Scan[]>> => {
+export const getScansList = (): Promise<
+  DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>
+> => {
   return performDatabaseOperation<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(() =>
     prisma.scan.findMany({
       select: {
@@ -82,4 +84,18 @@ export const getScansList = (): Promise<DatabaseOperationResult<Scan[]>> => {
       }
     })
   )
+}
+
+export const deleteFiles = (
+  count: number,
+  errors: string[]
+): Promise<DatabaseOperationResult<DeletedFiles>> => {
+  return performDatabaseOperation<DeletedFiles>(() => {
+    return prisma.deletedFiles.create({
+      data: {
+        count,
+        errors: JSON.stringify(errors)
+      }
+    })
+  })
 }

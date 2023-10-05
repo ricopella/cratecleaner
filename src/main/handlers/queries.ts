@@ -1,5 +1,6 @@
 import {
   ADD_NEW_SCAN,
+  DELETE_FILES,
   GET_CRATE_SRCS,
   GET_FILES_DIRECTORIES,
   GET_SCANS_LIST,
@@ -17,6 +18,7 @@ import {
 } from '@src/db/actions'
 import { ScanConfiguration } from '@src/types'
 import { ipcMain } from 'electron'
+import { deleteFiles } from '../utils'
 import { getDuplicates } from './duplicates'
 
 export const registerQueryHandler = (): void => {
@@ -76,5 +78,14 @@ export const registerQueryHandler = (): void => {
     const result = await getScansList()
 
     return result
+  })
+
+  ipcMain.handle(DELETE_FILES, async (_: unknown, filePaths: string[]) => {
+    // first delete files
+    const res = await deleteFiles(filePaths)
+
+    // increment total delete file count
+
+    // should update results?
   })
 }

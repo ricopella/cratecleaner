@@ -148,3 +148,9 @@ export type ResultsData = {
   name: string
   files: DuplicateFile[]
 }
+
+export type DeleteResult = {
+  successCount: number
+  errors: Record<string, string> // filePath: errorMessage
+  success: Record<string, boolean> // filePath: true
+}

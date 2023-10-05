@@ -19,10 +19,23 @@ model FilesDirectory {
 }
 
 model Scan {
-  id            String   @id @default(uuid()) @map("id")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id            String         @id @default(uuid()) @map("id")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   configuration String
-  status        String   @default("pending")
+  status        String         @default("pending")
   results       String? // Nullable since results are not available until scan is complete
+  DeletedFiles  DeletedFiles[]
+}
+
+model DeletedFiles {
+  id        String   @id @default(uuid()) @map("id")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  count     Int
+  errors    String // { [path]: errorMessage }
+  success   String // { [path]: true }
+  scan      Scan     @relation(fields: [scanId], references: [id])
+  scanId    String
+  status    String   @default("pending")
 }

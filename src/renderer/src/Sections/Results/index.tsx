@@ -1,4 +1,5 @@
 // import { trashFileList } from '@renderer/actions/ipc'
+import { deleteFiles } from '@renderer/actions/ipc'
 import Loader from '@renderer/components/Loader'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
@@ -146,7 +147,7 @@ export default function Results({ id }: { id: string }): JSX.Element {
     })
 
     // update state
-    // await trashFileList(filesToDelete)
+    await deleteFiles(filesToDelete)
 
     // TODO: figure out what to do with results since now that data set is stale
 
@@ -190,7 +191,10 @@ export default function Results({ id }: { id: string }): JSX.Element {
       <dialog id="modal" className="modal">
         <div className="modal-box">
           <h3 className="font-bold text-lg">Delete files</h3>
-          <p className="py-4">Are you sure you want to delete {selectedCount} files.</p>
+          <p className="py-4 text-warning">
+            Are you sure you want to delete {selectedCount} file(s). This can not be un-dune or
+            restored. The files will be permanently removed.
+          </p>
           <div className="modal-action">
             <form method="dialog">
               <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>

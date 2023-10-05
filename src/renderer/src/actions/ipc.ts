@@ -1,6 +1,7 @@
 import { CrateSrc, FilesDirectory, Scan } from '@prisma/client'
 import {
   ADD_NEW_SCAN,
+  DELETE_FILES,
   DIALOG_CRATE_SRC,
   DIALOG_FILES_DIRECTORY,
   GET_CRATE_SRCS,
@@ -82,4 +83,8 @@ export const getScansList = (): Promise<
   DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>
 > => {
   return invokeIPC<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(GET_SCANS_LIST)
+}
+
+export const deleteFiles = (filePaths: string[]): Promise<void> => {
+  return ipcRenderer.invoke(DELETE_FILES, filePaths)
 }
