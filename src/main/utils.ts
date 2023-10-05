@@ -1,5 +1,5 @@
-import { DeleteResult } from '@src/types'
 import fs from 'node:fs/promises'
+import { DeleteResult } from '../types'
 
 export async function deleteFiles(filePaths: string[]): Promise<DeleteResult> {
   const deleteResult: DeleteResult = {

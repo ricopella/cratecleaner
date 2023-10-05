@@ -1,5 +1,6 @@
 import { CrateSrc, DeletedFiles, FilesDirectory, Prisma, Scan } from '@prisma/client'
-import { DatabaseOperationResult, ScanConfiguration } from '@src/types'
+import { keys } from 'ramda'
+import { DatabaseOperationResult, ScanConfiguration } from '../types'
 import { prisma } from './prismaClient'
 
 export const insertSection = async (
@@ -87,14 +88,19 @@ export const getScansList = (): Promise<
 }
 
 export const deleteFiles = (
-  count: number,
-  errors: string[]
+  scanId: string,
+  success: Record<string, boolean>,
+  errors: Record<string, string>
 ): Promise<DatabaseOperationResult<DeletedFiles>> => {
   return performDatabaseOperation<DeletedFiles>(() => {
+    // TODO: change this to update
     return prisma.deletedFiles.create({
       data: {
-        count,
-        errors: JSON.stringify(errors)
+        count: keys(success).length,
+        errors: JSON.stringify(errors),
+        success: JSON.stringify(success),
+        scanId: scanId
+        // status: 'completed'
       }
     })
   })
