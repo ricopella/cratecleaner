@@ -1,9 +1,8 @@
-// import { trashFileList } from '@renderer/actions/ipc'
 import { deleteFiles } from '@renderer/actions/ipc'
 import Loader from '@renderer/components/Loader'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
-import { ResultsData, ScanResults } from '@src/types'
+import { DuplicateFile, ResultsData, ScanResults } from '@src/types'
 import {
   ExpandedState,
   createColumnHelper,
@@ -72,12 +71,30 @@ const columns = [
     enableGrouping: false
   }),
 
-  columnHelper.accessor('path', {
-    cell: (info) => info.getValue(),
+  columnHelper.accessor('files.path', {
+    header: 'Path',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return ''
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+
+      return row?.path ?? ''
+    },
     enableGrouping: false
   }),
-  columnHelper.accessor('type', {
-    cell: (info) => info.getValue(),
+  columnHelper.accessor('files.type', {
+    header: 'Type',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return ''
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+
+      return row?.type ?? ''
+    },
     enableGrouping: false,
     size: 32
   }),
@@ -123,8 +140,6 @@ export default function Results({ id }: { id: string }): JSX.Element {
     debugTable: true,
     columnResizeMode: 'onChange'
   })
-
-  console.log({ selected })
 
   const selectedCount = useMemo(() => {
     return Object.values(selected).filter(Boolean).length

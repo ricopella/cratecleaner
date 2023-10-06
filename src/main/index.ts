@@ -2,7 +2,6 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { BrowserWindow, app, shell } from 'electron'
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer'
 import { join } from 'path'
-import icon from '../../resources/icon.png?asset'
 
 import { registerFileDialogHandler } from './handlers/dialogs'
 import { registerQueryHandler } from './handlers/queries'
@@ -14,7 +13,6 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false

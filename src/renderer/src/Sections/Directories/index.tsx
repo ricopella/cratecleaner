@@ -33,6 +33,7 @@ const List = (): JSX.Element => {
     () => [
       columnHelper.display({
         id: 'select',
+        size: 16,
         header: ({ table }) => (
           <IndeterminateCheckbox
             {...{
@@ -43,7 +44,7 @@ const List = (): JSX.Element => {
           />
         ),
         cell: ({ row }) => (
-          <div className="px-1">
+          <div className="pl-8">
             <IndeterminateCheckbox
               {...{
                 checked: row.getIsSelected(),
