@@ -1,105 +1,9 @@
-import { CrateSrc, FilesDirectory, Scan } from '@prisma/client'
+import { Scan } from '@prisma/client'
 import { z } from 'zod'
-import {
-  ADD_NEW_SCAN,
-  CREATE_CRATE_SRC,
-  GET_CRATE_SRCS,
-  GET_FILES_DIRECTORIES,
-  NEW_FILES_DIRECTORY,
-  REMOVE_DIRECTORIES,
-  REMOVE_SCAN,
-  UPDATE_ACTIVE_TAB,
-  UPDATE_SCAN_STATUS
-} from './constants'
 
 export type DatabaseOperationResult<T> =
   | { success: true; data: T }
   | { success: false; error: string }
-
-export type MainState = {
-  crateSrcs: CrateSrc[]
-  directorySrcs: FilesDirectory[]
-  scans: Record<string, ExtendedScan>
-  activeTab: string // DIRECTORIES or uuid if result
-}
-
-export interface CreateCrateSrcAction {
-  type: typeof CREATE_CRATE_SRC
-  payload: {
-    path: string
-  }
-}
-
-export interface GetCrateSrcs {
-  type: typeof GET_CRATE_SRCS
-  payload: {
-    crateSrcs: CrateSrc[]
-  }
-}
-
-interface GetFileDirectories {
-  type: typeof GET_FILES_DIRECTORIES
-  payload: {
-    directorySrcs: FilesDirectory[]
-  }
-}
-
-interface NewFileDirectory {
-  type: typeof NEW_FILES_DIRECTORY
-  payload: {
-    directorySrc: FilesDirectory
-  }
-}
-
-interface DeleteFileDirectories {
-  type: typeof REMOVE_DIRECTORIES
-  payload: {
-    ids: string[]
-  }
-}
-
-interface AddNewScan {
-  type: typeof ADD_NEW_SCAN
-  payload: {
-    id: string
-    scan: ExtendedScan
-  }
-}
-
-interface UpdateScanStatus {
-  type: typeof UPDATE_SCAN_STATUS
-  payload: ExtendedScan
-}
-
-interface UpdateActiveTab {
-  type: typeof UPDATE_ACTIVE_TAB
-  payload: {
-    activeTab: string
-  }
-}
-
-interface RemoveScan {
-  type: typeof REMOVE_SCAN
-  payload: {
-    id: string
-  }
-}
-
-export type MainActions =
-  | CreateCrateSrcAction
-  | GetCrateSrcs
-  | GetFileDirectories
-  | NewFileDirectory
-  | DeleteFileDirectories
-  | AddNewScan
-  | UpdateScanStatus
-  | UpdateActiveTab
-  | RemoveScan
-
-export interface MainContextProps {
-  state: MainState
-  dispatch: React.Dispatch<MainActions>
-}
 
 export interface TableContextProps {
   rowSelection: Record<string, boolean>
@@ -141,6 +45,8 @@ export type ScanResults = z.infer<typeof resultsSchema>
 export type ExtendedScan = Omit<Scan, 'results' | 'configuration'> & {
   results: z.infer<typeof ScanResultsSchema>
   configuration: z.infer<typeof ScanConfigurationSchema>
+  trackingDeleteId?: string | null
+  deletedFiles: DeletedFilesSchema[]
 }
 
 export type ResultsData = {
@@ -149,8 +55,20 @@ export type ResultsData = {
   files: DuplicateFile[]
 }
 
+export const deletedFilesSchema = z.object({
+  id: z.string(),
+  count: z.number(),
+  status: z.string(),
+  errors: z.record(z.string(), z.string()),
+  success: z.record(z.string(), z.boolean()),
+  scanId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date()
+})
+
+export type DeletedFilesSchema = z.infer<typeof deletedFilesSchema>
+
 export type DeleteResult = {
-  successCount: number
   errors: Record<string, string> // filePath: errorMessage
   success: Record<string, boolean> // filePath: true
 }

@@ -25,7 +25,7 @@ model Scan {
   configuration String
   status        String         @default("pending")
   results       String? // Nullable since results are not available until scan is complete
-  DeletedFiles  DeletedFiles[]
+  deletedFiles  DeletedFiles[]
 }
 
 model DeletedFiles {

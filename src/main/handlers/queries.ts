@@ -3,6 +3,7 @@ import {
   ADD_NEW_SCAN,
   DELETE_FILES,
   GET_CRATE_SRCS,
+  GET_DELETE_FILES_BY_ID,
   GET_FILES_DIRECTORIES,
   GET_SCANS_LIST,
   GET_SCAN_BY_ID,
@@ -12,6 +13,7 @@ import {
   createScan,
   deleteFiles,
   getCrateSrcs,
+  getDeleteFilesById,
   getFilesDirectories,
   getScanById,
   getScansList,
@@ -81,8 +83,16 @@ export const registerQueryHandler = (): void => {
     return result
   })
 
-  ipcMain.handle(DELETE_FILES, async (_: unknown, filePaths: string[], scanId: string) => {
-    const res = await deleteFilesUtil(filePaths)
-    await deleteFiles(scanId, res.success, res.errors)
+  ipcMain.handle(
+    DELETE_FILES,
+    async (_: unknown, filePaths: string[], scanId: string, deleteId: string) => {
+      const res = await deleteFilesUtil(filePaths)
+      await deleteFiles(scanId, res.success, res.errors, deleteId)
+    }
+  )
+
+  ipcMain.handle(GET_DELETE_FILES_BY_ID, async (_: unknown, id: string) => {
+    const result = await getDeleteFilesById(id)
+    return result
   })
 }

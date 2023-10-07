@@ -3,7 +3,6 @@ import { DeleteResult } from '../types'
 
 export async function deleteFiles(filePaths: string[]): Promise<DeleteResult> {
   const deleteResult: DeleteResult = {
-    successCount: 0,
     errors: {},
     success: {}
   }
@@ -11,7 +10,6 @@ export async function deleteFiles(filePaths: string[]): Promise<DeleteResult> {
   for (const filePath of filePaths) {
     try {
       await fs.unlink(filePath)
-      deleteResult.successCount++
       deleteResult.success[filePath] = true
     } catch (error) {
       const errorCode = (error as { code: string }).code

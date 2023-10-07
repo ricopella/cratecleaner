@@ -37,7 +37,8 @@ export default function PreviousResults(): JSX.Element {
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     results: { files: {} },
-                    configuration: { directoryPaths: [] }
+                    configuration: { directoryPaths: [] },
+                    deletedFiles: []
                   }
                 }
               })

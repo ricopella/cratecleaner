@@ -1,10 +1,11 @@
-import { CrateSrc, FilesDirectory, Scan } from '@prisma/client'
+import { CrateSrc, DeletedFiles, FilesDirectory, Scan } from '@prisma/client'
 import {
   ADD_NEW_SCAN,
   DELETE_FILES,
   DIALOG_CRATE_SRC,
   DIALOG_FILES_DIRECTORY,
   GET_CRATE_SRCS,
+  GET_DELETE_FILES_BY_ID,
   GET_DUPLICATES,
   GET_FILES_DIRECTORIES,
   GET_SCANS_LIST,
@@ -69,14 +70,38 @@ export const removeDirectories = (
   return invokeIPC<boolean, string[]>(REMOVE_DIRECTORIES, directories)
 }
 
-export const fetchScanStatusById = (id: string): Promise<DatabaseOperationResult<Scan>> => {
-  return invokeIPC<Scan, string>(GET_SCAN_BY_ID, id)
+export const fetchScanStatusById = (
+  id: string
+): Promise<
+  DatabaseOperationResult<
+    Scan & {
+      deletedFiles: DeletedFiles[]
+    }
+  >
+> => {
+  return invokeIPC<
+    Scan & {
+      deletedFiles: DeletedFiles[]
+    },
+    string
+  >(GET_SCAN_BY_ID, id)
 }
 
 export const insertScan = (
   configuration: ScanConfiguration
-): Promise<DatabaseOperationResult<Scan>> => {
-  return invokeIPC<Scan, ScanConfiguration>(ADD_NEW_SCAN, configuration)
+): Promise<
+  DatabaseOperationResult<
+    Scan & {
+      deletedFiles: DeletedFiles[]
+    }
+  >
+> => {
+  return invokeIPC<
+    Scan & {
+      deletedFiles: DeletedFiles[]
+    },
+    ScanConfiguration
+  >(ADD_NEW_SCAN, configuration)
 }
 
 export const getScansList = (): Promise<
@@ -85,6 +110,16 @@ export const getScansList = (): Promise<
   return invokeIPC<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(GET_SCANS_LIST)
 }
 
-export const deleteFiles = (filePaths: string[]): Promise<void> => {
-  return ipcRenderer.invoke(DELETE_FILES, filePaths)
+export const deleteFiles = (
+  filePaths: string[],
+  scanId: string,
+  deleteId: string
+): Promise<void> => {
+  return ipcRenderer.invoke(DELETE_FILES, filePaths, scanId, deleteId)
+}
+
+export const getDeletedFilesById = (
+  id: string
+): Promise<DatabaseOperationResult<DeletedFiles | null>> => {
+  return invokeIPC<DeletedFiles | null, string>(GET_DELETE_FILES_BY_ID, id)
 }

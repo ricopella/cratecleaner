@@ -2,6 +2,7 @@ import { deleteFiles } from '@renderer/actions/ipc'
 import Loader from '@renderer/components/Loader'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
+import { ADD_TRACKING_DELETE_ID } from '@src/constants'
 import { DuplicateFile, ResultsData, ScanResults } from '@src/types'
 import {
   ExpandedState,
@@ -10,6 +11,7 @@ import {
   useReactTable
 } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
+import { v4 } from 'uuid'
 import ArrowRight from '../../assets/arrow-right.svg?react'
 import TableBody from './TableBody'
 import TableHeader from './TableHeader'
@@ -107,7 +109,7 @@ const columns = [
   })
 ]
 export default function Results({ id }: { id: string }): JSX.Element {
-  const { state } = useMain()
+  const { state, dispatch } = useMain()
   const scan = state.scans[id]
   const results: ScanResults = scan.results ?? { files: {} }
   const [expanded, setExpanded] = useState<ExpandedState>({})
@@ -154,26 +156,36 @@ export default function Results({ id }: { id: string }): JSX.Element {
   }
 
   const onDelete = async (): Promise<void> => {
-    // delete files
-    // get a list of all the file paths to delete and send to main process
     const filesToDelete = Object.keys(selected).map((key) => {
       const [rowId, fileIndex] = key.split('.')
       return data[Number(rowId)].files[Number(fileIndex)].path
     })
 
-    // update state
-    await deleteFiles(filesToDelete)
+    // generate new uuid
+    const deleteId = v4()
 
-    // TODO: figure out what to do with results since now that data set is stale
+    // add to tracking to state so it can pool for results
+    dispatch({
+      type: ADD_TRACKING_DELETE_ID,
+      payload: {
+        deleteId: deleteId,
+        scanId: id
+      }
+    })
 
-    // TODO: show success alert
+    await deleteFiles(filesToDelete, id, deleteId)
+
     setSelected({})
   }
-
+  console.log({ scan })
   return (
     <>
       <div className={classNames.container}>
-        <div></div>
+        <div>
+          {scan.deletedFiles.map((del) => (
+            <div key={del.id}>{del.count}</div>
+          ))}
+        </div>
         <div className={classNames.tableContainer}>
           {scan.status === 'pending' ? (
             <div className="h-full w-full flex justify-center items-center">
