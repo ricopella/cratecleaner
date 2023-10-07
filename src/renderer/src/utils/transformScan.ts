@@ -9,7 +9,7 @@ export const transformScan = (
 ): ExtendedScan => {
   const configurationRes = ScanConfigurationSchema.safeParse(JSON.parse(scan.configuration))
   const resultsRes = ScanResultsSchema.safeParse(JSON.parse(scan.results ?? '{}'))
-  const deletedFiles = scan.deletedFiles.map((f) => transformDeletedFiles(f))
+  const deletedFiles = (scan.deletedFiles || []).map((f) => transformDeletedFiles(f))
 
   if (configurationRes.success === false || resultsRes.success === false) {
     return {

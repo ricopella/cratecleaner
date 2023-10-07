@@ -5,7 +5,7 @@ export default function TableBody<T>({ table }: { table: Table<T> }): JSX.Elemen
 
   return (
     <tbody>
-      {table.getRowModel().rows.map((row) => {
+      {table.getRowModel().rows.map((row, i) => {
         const isEvenParentRow = parentRowIndex % 2 === 0
         const bgColorClass = isEvenParentRow ? 'bg-base-200' : 'bg-base-200 bg-opacity-parent'
 
@@ -13,10 +13,9 @@ export default function TableBody<T>({ table }: { table: Table<T> }): JSX.Elemen
         if (row.depth === 0) {
           parentRowIndex++
         }
-
         return (
           <>
-            <tr key={row.id} className={bgColorClass}>
+            <tr key={`${row.id}_${i}`} className={bgColorClass}>
               {row.getVisibleCells().map((cell) => {
                 return (
                   <td

@@ -104,7 +104,7 @@ const columns = [
     id: 'duplicateCount',
     size: 24,
     header: () => <span>Dupe Count</span>,
-    cell: ({ row }) => row.original.files.length,
+    cell: ({ row }) => (row.depth === 0 ? row.original.files.length : ''),
     enableGrouping: false
   })
 ]
@@ -116,8 +116,8 @@ export default function Results({ id }: { id: string }): JSX.Element {
   const [selected, setSelected] = useState<Record<string, boolean>>({})
 
   const data: ResultsData[] = useMemo(() => {
-    return transformScanResultsToRows(results)
-  }, [results])
+    return transformScanResultsToRows(results, scan)
+  }, [results, scan])
 
   // Create an instance of the table
   const table = useReactTable<ResultsData>({
