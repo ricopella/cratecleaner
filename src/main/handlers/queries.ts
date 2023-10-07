@@ -23,6 +23,7 @@ import {
 import { ScanConfiguration } from '../../types'
 import { deleteFiles as deleteFilesUtil } from '../utils'
 import { getDuplicates } from './duplicates'
+import { getDuplicatesWithMetadata } from './utils'
 
 export const registerQueryHandler = (): void => {
   ipcMain.handle(GET_CRATE_SRCS, async () => {
@@ -55,12 +56,13 @@ export const registerQueryHandler = (): void => {
     setImmediate(async () => {
       try {
         const scanResults = await getDuplicates(configuration.directoryPaths)
+        const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults)
 
         await updateScanById(
           results.data.id,
           'completed',
           JSON.stringify({
-            files: Object.fromEntries(scanResults)
+            files: Object.fromEntries(resultsWithMetadata)
           })
         )
       } catch (error) {

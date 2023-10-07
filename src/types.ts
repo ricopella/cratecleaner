@@ -1,5 +1,6 @@
 import { Scan } from '@prisma/client'
 import { z } from 'zod'
+import { Metadata } from './main/handlers/audioMetadata'
 
 export type DatabaseOperationResult<T> =
   | { success: true; data: T }
@@ -16,6 +17,10 @@ export type FileInfo = {
   name: string
   path: string
   type: string
+}
+
+export type FileWithMetadata = FileInfo & {
+  metadata: Metadata | null
 }
 
 export type Status = 'idle' | 'loading' | 'success' | 'error'
@@ -71,4 +76,23 @@ export type DeletedFilesSchema = z.infer<typeof deletedFilesSchema>
 export type DeleteResult = {
   errors: Record<string, string> // filePath: errorMessage
   success: Record<string, boolean> // filePath: true
+}
+
+export type SeratoFolders = {
+  [key: string]: string
+}
+
+export type CrateFile = {
+  filepath: string
+  subcrate: Subcrate
+}
+
+export type CrateSong = {
+  name: string
+  path: string
+}
+
+export type Subcrate = {
+  name: string
+  songs: CrateSong[]
 }
