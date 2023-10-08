@@ -218,7 +218,8 @@ export default function Results({ id }: { id: string }): JSX.Element {
         title: file.metadata?.title ?? '',
         bpm: file.metadata?.bpm ?? '',
         genre: file.metadata?.genre?.[0] ?? '',
-        files: []
+        files: [],
+        crates: file.crates
       }))
     },
     state: {

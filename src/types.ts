@@ -45,7 +45,7 @@ const duplicateFile = z.object({
   name: z.string(),
   path: z.string(),
   type: z.string(),
-  metadata: fileMetadata.optional(),
+  metadata: fileMetadata.nullable().optional(),
   crates: z.array(z.string())
 })
 
