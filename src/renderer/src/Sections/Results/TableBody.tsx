@@ -19,7 +19,7 @@ export default function TableBody<T>({ table }: { table: Table<T> }): JSX.Elemen
     <tbody>
       {table.getRowModel().rows.map((row, i) => {
         const isEvenParentRow = parentRowIndex % 2 === 0
-        const bgColorClass = isEvenParentRow ? 'bg-base-200' : 'bg-base-200 bg-opacity-parent'
+        const bgColorClass = isEvenParentRow ? 'bg-base-100' : 'bg-base-300'
 
         // Increment parent row index only if it's a parent row
         if (row.depth === 0) {

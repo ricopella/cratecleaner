@@ -3,7 +3,7 @@ import Resizer from './Resizer'
 
 export default function TableHeader<T>({ table }: { table: Table<T> }): JSX.Element {
   return (
-    <thead>
+    <thead className="sticky top-0 bg-base-200 z-10">
       {table.getHeaderGroups().map((headerGroup) => (
         <tr key={headerGroup.id}>
           {headerGroup.headers.map((header) => {
