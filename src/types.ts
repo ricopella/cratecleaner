@@ -21,6 +21,7 @@ export type FileInfo = {
 
 export type FileWithMetadata = FileInfo & {
   metadata: Metadata | null
+  crates: string[]
 }
 
 export type Status = 'idle' | 'loading' | 'success' | 'error'
@@ -31,10 +32,21 @@ export const ScanConfigurationSchema = z.object({
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>
 
+const fileMetadata = z.object({
+  album: z.string().optional(),
+  artist: z.string().optional(),
+  genre: z.array(z.string()).optional(),
+  title: z.string().optional(),
+  comment: z.array(z.string()).optional(),
+  bpm: z.number().optional()
+})
+
 const duplicateFile = z.object({
   name: z.string(),
   path: z.string(),
-  type: z.string()
+  type: z.string(),
+  metadata: fileMetadata.optional(),
+  crates: z.array(z.string())
 })
 
 export type DuplicateFile = z.infer<typeof duplicateFile>

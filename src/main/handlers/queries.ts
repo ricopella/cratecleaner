@@ -21,6 +21,7 @@ import {
   updateScanById
 } from '../../db/actions'
 import { ScanConfiguration } from '../../types'
+import { listCrateFiles } from '../serato'
 import { deleteFiles as deleteFilesUtil } from '../utils'
 import { getDuplicates } from './duplicates'
 import { getDuplicatesWithMetadata } from './utils'
@@ -55,14 +56,17 @@ export const registerQueryHandler = (): void => {
     // Start the duplicate scan in a non-blocking manner
     setImmediate(async () => {
       try {
-        const scanResults = await getDuplicates(configuration.directoryPaths)
+        const scanResults = await Promise.all([
+          getDuplicates(configuration.directoryPaths),
+          listCrateFiles()
+        ])
         const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults)
 
         await updateScanById(
           results.data.id,
           'completed',
           JSON.stringify({
-            files: Object.fromEntries(resultsWithMetadata)
+            files: resultsWithMetadata.size > 0 ? Object.fromEntries(resultsWithMetadata) : {}
           })
         )
       } catch (error) {

@@ -89,7 +89,10 @@ export default function ActionsRow(): JSX.Element {
         <ErrorMessage error={error} />
       </div>
       <PreviousResults />
-      <button className={classNames.btn} onClick={handleNewScan}>
+      <button
+        className={`${classNames.btn} ${state.directorySrcs.length === 0 ? 'btn-disabled' : ''}`}
+        onClick={handleNewScan}
+      >
         Scan
       </button>
     </div>

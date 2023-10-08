@@ -72,6 +72,7 @@ export const MainProvider: React.FC<MainProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const intervalIds: NodeJS.Timeout[] = []
+    const pollingDuration = 3 * 60 * 1000
 
     Object.keys(state.scans).forEach((id) => {
       const scan = state.scans[id]
@@ -86,7 +87,7 @@ export const MainProvider: React.FC<MainProviderProps> = ({ children }) => {
         const intervalId = setInterval(async () => {
           // Fetch the latest status from your backend
           const scanRes = await fetchScanStatusById(id)
-
+          console.log({ scanRes })
           if (scanRes.success === false) {
             clearInterval(intervalId)
             // TODO: handle error
@@ -97,6 +98,7 @@ export const MainProvider: React.FC<MainProviderProps> = ({ children }) => {
             clearInterval(intervalId)
 
             const scan = transformScan(scanRes.data)
+            console.log({ scan, scanRes })
 
             dispatch({
               type: UPDATE_SCAN_STATUS,
@@ -109,7 +111,13 @@ export const MainProvider: React.FC<MainProviderProps> = ({ children }) => {
       }
     })
 
+    const timeoutId = setTimeout(() => {
+      intervalIds.forEach((id) => clearInterval(id))
+    }, pollingDuration)
+
     return () => {
+      clearTimeout(timeoutId)
+
       intervalIds.forEach((id) => clearInterval(id))
     }
   }, [state.scans])

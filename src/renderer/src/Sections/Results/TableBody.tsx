@@ -3,6 +3,18 @@ import { Table, flexRender } from '@tanstack/react-table'
 export default function TableBody<T>({ table }: { table: Table<T> }): JSX.Element {
   let parentRowIndex = 0 // Initialize parent row index
 
+  if (table.getTopRows().length === 0) {
+    return (
+      <tbody>
+        <tr>
+          <td colSpan={table.getVisibleFlatColumns().length}>
+            No duplicate files found. Add additional directories
+          </td>
+        </tr>
+      </tbody>
+    )
+  }
+
   return (
     <tbody>
       {table.getRowModel().rows.map((row, i) => {

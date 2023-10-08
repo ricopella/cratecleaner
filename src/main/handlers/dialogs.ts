@@ -28,7 +28,6 @@ export const registerFileDialogHandler = (): void => {
     if (!result.canceled && result.filePaths.length > 0) {
       // TODO: support multiple directories
       const newDirectory = await createFilesDirectory(result.filePaths[0])
-      console.log({ newDirectory })
       event.sender.send(NEW_FILES_DIRECTORY, newDirectory)
     }
   })

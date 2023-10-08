@@ -86,6 +86,72 @@ const columns = [
     },
     enableGrouping: false
   }),
+
+  columnHelper.accessor('files.title', {
+    header: 'Title',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return ''
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+
+      return row?.title ?? ''
+    },
+    enableGrouping: false
+  }),
+  columnHelper.accessor('files.artist', {
+    header: 'Artist',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return ''
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+
+      return row?.artist ?? ''
+    },
+    enableGrouping: false
+  }),
+  columnHelper.accessor('files.album', {
+    header: 'Album',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return ''
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+
+      return row?.album ?? ''
+    },
+    enableGrouping: false
+  }),
+  columnHelper.accessor('files.genre', {
+    header: 'Genre',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return ''
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+
+      return row?.genre ?? ''
+    },
+    enableGrouping: false
+  }),
+  columnHelper.accessor('files.bpm', {
+    header: 'BPM',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return ''
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+
+      return row?.bpm ?? ''
+    },
+    enableGrouping: false
+  }),
   columnHelper.accessor('files.type', {
     header: 'Type',
     cell: (info) => {
@@ -96,6 +162,20 @@ const columns = [
       const row = info.row.original as unknown as DuplicateFile
 
       return row?.type ?? ''
+    },
+    enableGrouping: false,
+    size: 32
+  }),
+  columnHelper.accessor('files.crates', {
+    header: 'Crates',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return ''
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+
+      return row?.crates.join(', ') ?? ''
     },
     enableGrouping: false,
     size: 32
@@ -132,6 +212,12 @@ export default function Results({ id }: { id: string }): JSX.Element {
         id: `${row.id}-${fileIndex}`, // Generate a unique ID for the sub-row
         name: file.name,
         path: file.path,
+        type: file.type,
+        artist: file.metadata?.artist ?? '',
+        album: file.metadata?.album ?? '',
+        title: file.metadata?.title ?? '',
+        bpm: file.metadata?.bpm ?? '',
+        genre: file.metadata?.genre?.[0] ?? '',
         files: []
       }))
     },
