@@ -1,4 +1,3 @@
-import { createCrateSrc, createFilesDirectory } from '@src/db/actions'
 import { dialog, ipcMain } from 'electron'
 import {
   DIALOG_CRATE_SRC,
@@ -6,6 +5,7 @@ import {
   NEW_CRATE_SRC,
   NEW_FILES_DIRECTORY
 } from '../../constants'
+import { createCrateSrc, createFilesDirectory } from '../../db/actions'
 
 export const registerFileDialogHandler = (): void => {
   ipcMain.on(DIALOG_CRATE_SRC, async (event) => {
@@ -28,7 +28,6 @@ export const registerFileDialogHandler = (): void => {
     if (!result.canceled && result.filePaths.length > 0) {
       // TODO: support multiple directories
       const newDirectory = await createFilesDirectory(result.filePaths[0])
-      console.log({ newDirectory })
       event.sender.send(NEW_FILES_DIRECTORY, newDirectory)
     }
   })

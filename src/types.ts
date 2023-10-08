@@ -1,86 +1,10 @@
-import { CrateSrc, FilesDirectory, Scan } from '@prisma/client'
+import { Scan } from '@prisma/client'
 import { z } from 'zod'
-import {
-  ADD_NEW_SCAN,
-  CREATE_CRATE_SRC,
-  GET_CRATE_SRCS,
-  GET_FILES_DIRECTORIES,
-  NEW_FILES_DIRECTORY,
-  REMOVE_DIRECTORIES,
-  UPDATE_SCAN_STATUS
-} from './constants'
+import { Metadata } from './main/handlers/audioMetadata'
 
 export type DatabaseOperationResult<T> =
   | { success: true; data: T }
   | { success: false; error: string }
-
-export type MainState = {
-  crateSrcs: CrateSrc[]
-  directorySrcs: FilesDirectory[]
-  scans: Record<string, ExtendedScan>
-}
-
-export interface CreateCrateSrcAction {
-  type: typeof CREATE_CRATE_SRC
-  payload: {
-    path: string
-  }
-}
-
-export interface GetCrateSrcs {
-  type: typeof GET_CRATE_SRCS
-  payload: {
-    crateSrcs: CrateSrc[]
-  }
-}
-
-interface GetFileDirectories {
-  type: typeof GET_FILES_DIRECTORIES
-  payload: {
-    directorySrcs: FilesDirectory[]
-  }
-}
-
-interface NewFileDirectory {
-  type: typeof NEW_FILES_DIRECTORY
-  payload: {
-    directorySrc: FilesDirectory
-  }
-}
-
-interface DeleteFileDirectories {
-  type: typeof REMOVE_DIRECTORIES
-  payload: {
-    ids: string[]
-  }
-}
-
-interface AddNewScan {
-  type: typeof ADD_NEW_SCAN
-  payload: {
-    id: string
-    scan: ExtendedScan
-  }
-}
-
-interface UpdateScanStatus {
-  type: typeof UPDATE_SCAN_STATUS
-  payload: ExtendedScan
-}
-
-export type MainActions =
-  | CreateCrateSrcAction
-  | GetCrateSrcs
-  | GetFileDirectories
-  | NewFileDirectory
-  | DeleteFileDirectories
-  | AddNewScan
-  | UpdateScanStatus
-
-export interface MainContextProps {
-  state: MainState
-  dispatch: React.Dispatch<MainActions>
-}
 
 export interface TableContextProps {
   rowSelection: Record<string, boolean>
@@ -95,6 +19,11 @@ export type FileInfo = {
   type: string
 }
 
+export type FileWithMetadata = FileInfo & {
+  metadata: Metadata | null
+  crates: string[]
+}
+
 export type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export const ScanConfigurationSchema = z.object({
@@ -103,23 +32,79 @@ export const ScanConfigurationSchema = z.object({
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>
 
-export const ScanResultsSchema = z.union([
-  z.object({
-    files: z.record(
-      z.string(),
-      z.array(
-        z.object({
-          name: z.string(),
-          path: z.string(),
-          type: z.string()
-        })
-      )
-    )
-  }),
-  z.null()
-])
+const fileMetadata = z.object({
+  album: z.string().optional(),
+  artist: z.string().optional(),
+  genre: z.array(z.string()).optional(),
+  title: z.string().optional(),
+  comment: z.array(z.string()).optional(),
+  bpm: z.number().optional()
+})
+
+const duplicateFile = z.object({
+  name: z.string(),
+  path: z.string(),
+  type: z.string(),
+  metadata: fileMetadata.nullable().optional(),
+  crates: z.array(z.string())
+})
+
+export type DuplicateFile = z.infer<typeof duplicateFile>
+
+const resultsSchema = z.object({
+  files: z.record(z.string(), z.array(duplicateFile))
+})
+
+export const ScanResultsSchema = z.union([resultsSchema, z.null()])
+
+export type ScanResults = z.infer<typeof resultsSchema>
 
 export type ExtendedScan = Omit<Scan, 'results' | 'configuration'> & {
   results: z.infer<typeof ScanResultsSchema>
   configuration: z.infer<typeof ScanConfigurationSchema>
+  trackingDeleteId?: string | null
+  deletedFiles: DeletedFilesSchema[]
+}
+
+export type ResultsData = {
+  id: string
+  name: string
+  files: DuplicateFile[]
+}
+
+export const deletedFilesSchema = z.object({
+  id: z.string(),
+  count: z.number(),
+  status: z.string(),
+  errors: z.record(z.string(), z.string()),
+  success: z.record(z.string(), z.boolean()),
+  scanId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date()
+})
+
+export type DeletedFilesSchema = z.infer<typeof deletedFilesSchema>
+
+export type DeleteResult = {
+  errors: Record<string, string> // filePath: errorMessage
+  success: Record<string, boolean> // filePath: true
+}
+
+export type SeratoFolders = {
+  [key: string]: string
+}
+
+export type CrateFile = {
+  filepath: string
+  subcrate: Subcrate
+}
+
+export type CrateSong = {
+  name: string
+  path: string
+}
+
+export type Subcrate = {
+  name: string
+  songs: CrateSong[]
 }

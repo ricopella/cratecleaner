@@ -1,5 +1,6 @@
-import { CrateSrc, FilesDirectory, Prisma, Scan } from '@prisma/client'
-import { DatabaseOperationResult, ScanConfiguration } from '@src/types'
+import { CrateSrc, DeletedFiles, FilesDirectory, Prisma, Scan } from '@prisma/client'
+import { keys } from 'ramda'
+import { DatabaseOperationResult, ScanConfiguration } from '../types'
 import { prisma } from './prismaClient'
 
 export const insertSection = async (
@@ -57,7 +58,14 @@ export const createScan = (
     prisma.scan.create({ data: { configuration: JSON.stringify(configuration) } })
   )
 export const getScanById = (id: string): Promise<DatabaseOperationResult<Scan | null>> =>
-  performDatabaseOperation<Scan | null>(() => prisma.scan.findUnique({ where: { id } }))
+  performDatabaseOperation<Scan | null>(() =>
+    prisma.scan.findUnique({
+      where: { id },
+      include: {
+        deletedFiles: true
+      }
+    })
+  )
 
 export const updateScanById = async (
   id: string,
@@ -67,4 +75,59 @@ export const updateScanById = async (
   return performDatabaseOperation<Scan | null>(() =>
     prisma.scan.update({ where: { id }, data: { status, results } })
   )
+}
+
+export const getScansList = (): Promise<
+  DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>
+> => {
+  return performDatabaseOperation<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(() =>
+    prisma.scan.findMany({
+      select: {
+        id: true,
+        createdAt: true,
+        status: true,
+        deletedFiles: {
+          select: {
+            id: true,
+            count: true,
+            status: true,
+            errors: true,
+            success: true,
+            scanId: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+  )
+}
+
+export const deleteFiles = (
+  scanId: string,
+  success: Record<string, boolean>,
+  errors: Record<string, string>,
+  deleteId: string
+): Promise<DatabaseOperationResult<DeletedFiles>> => {
+  return performDatabaseOperation<DeletedFiles>(() => {
+    return prisma.deletedFiles.create({
+      data: {
+        id: deleteId,
+        count: keys(success).length,
+        errors: JSON.stringify(errors),
+        success: JSON.stringify(success),
+        scanId: scanId,
+        status: 'completed'
+      }
+    })
+  })
+}
+
+export const getDeleteFilesById = (
+  id: string
+): Promise<DatabaseOperationResult<DeletedFiles | null>> => {
+  return performDatabaseOperation<DeletedFiles | null>(() => {
+    return prisma.deletedFiles.findUnique({ where: { id } })
+  })
 }

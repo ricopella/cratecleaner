@@ -1,13 +1,14 @@
 import { insertScan, openFilesDirectoryDialog, removeDirectories } from '@renderer/actions/ipc'
 import ErrorMessage from '@renderer/components/ErrorMessage'
+import PreviousResults from '@renderer/components/PreviousResults'
 import { useMain } from '@renderer/context/MainContext'
 import { useTableContext } from '@renderer/context/TableContext'
 import { transformScan } from '@renderer/utils/transformScan'
-import { ADD_NEW_SCAN, REMOVE_DIRECTORIES } from '@src/constants'
+import { ADD_NEW_SCAN, REMOVE_DIRECTORIES, UPDATE_ACTIVE_TAB } from '@src/constants'
 import { isEmpty, keys } from 'ramda'
 
 const classNames = {
-  row: 'grid grid-cols-max-max-1fr-max gap-2',
+  row: 'grid grid-cols-max-max-1fr-max-max gap-2',
   btn: 'btn btn-sm',
   errorContainer: 'bg-base-200 p-2 rounded'
 }
@@ -64,7 +65,12 @@ export default function ActionsRow(): JSX.Element {
       }
     })
 
-    // TODO: set active tab to scan id
+    dispatch({
+      type: UPDATE_ACTIVE_TAB,
+      payload: {
+        activeTab: res.data.id
+      }
+    })
   }
 
   return (
@@ -82,7 +88,11 @@ export default function ActionsRow(): JSX.Element {
       <div className={classNames.errorContainer}>
         <ErrorMessage error={error} />
       </div>
-      <button className={classNames.btn} onClick={handleNewScan}>
+      <PreviousResults />
+      <button
+        className={`${classNames.btn} ${state.directorySrcs.length === 0 ? 'btn-disabled' : ''}`}
+        onClick={handleNewScan}
+      >
         Scan
       </button>
     </div>

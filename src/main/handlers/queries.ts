@@ -1,21 +1,30 @@
+import { ipcMain } from 'electron'
 import {
   ADD_NEW_SCAN,
+  DELETE_FILES,
   GET_CRATE_SRCS,
+  GET_DELETE_FILES_BY_ID,
   GET_FILES_DIRECTORIES,
+  GET_SCANS_LIST,
   GET_SCAN_BY_ID,
   REMOVE_DIRECTORIES
-} from '@src/constants'
+} from '../../constants'
 import {
   createScan,
+  deleteFiles,
   getCrateSrcs,
+  getDeleteFilesById,
   getFilesDirectories,
   getScanById,
+  getScansList,
   removeDirectories,
   updateScanById
-} from '@src/db/actions'
-import { ScanConfiguration } from '@src/types'
-import { ipcMain } from 'electron'
+} from '../../db/actions'
+import { ScanConfiguration } from '../../types'
+import { listCrateFiles } from '../serato'
+import { deleteFiles as deleteFilesUtil } from '../utils'
 import { getDuplicates } from './duplicates'
+import { getDuplicatesWithMetadata } from './utils'
 
 export const registerQueryHandler = (): void => {
   ipcMain.handle(GET_CRATE_SRCS, async () => {
@@ -47,13 +56,17 @@ export const registerQueryHandler = (): void => {
     // Start the duplicate scan in a non-blocking manner
     setImmediate(async () => {
       try {
-        const scanResults = await getDuplicates(configuration.directoryPaths)
+        const scanResults = await Promise.all([
+          getDuplicates(configuration.directoryPaths),
+          listCrateFiles()
+        ])
+        const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults)
 
         await updateScanById(
           results.data.id,
           'completed',
           JSON.stringify({
-            files: Object.fromEntries(scanResults)
+            files: resultsWithMetadata.size > 0 ? Object.fromEntries(resultsWithMetadata) : {}
           })
         )
       } catch (error) {
@@ -67,6 +80,25 @@ export const registerQueryHandler = (): void => {
   ipcMain.handle(GET_SCAN_BY_ID, async (_: unknown, scanId: string) => {
     const result = await getScanById(scanId)
 
+    return result
+  })
+
+  ipcMain.handle(GET_SCANS_LIST, async () => {
+    const result = await getScansList()
+
+    return result
+  })
+
+  ipcMain.handle(
+    DELETE_FILES,
+    async (_: unknown, filePaths: string[], scanId: string, deleteId: string) => {
+      const res = await deleteFilesUtil(filePaths)
+      await deleteFiles(scanId, res.success, res.errors, deleteId)
+    }
+  )
+
+  ipcMain.handle(GET_DELETE_FILES_BY_ID, async (_: unknown, id: string) => {
+    const result = await getDeleteFilesById(id)
     return result
   })
 }

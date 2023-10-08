@@ -1,4 +1,5 @@
 import { FilesDirectory } from '@prisma/client'
+import Loader from '@renderer/components/Loader'
 import Body from '@renderer/components/Table/Body'
 import TableFooter from '@renderer/components/Table/Footer'
 import TableHeader from '@renderer/components/Table/Header'
@@ -6,11 +7,8 @@ import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbo
 import { useMain } from '@renderer/context/MainContext'
 import { TableProvider, useTableContext } from '@renderer/context/TableContext'
 import useFetchDirectories from '@renderer/hooks/useDirectoriesList'
-import { useIpcListener } from '@renderer/hooks/useIPCListener'
-import { NEW_FILES_DIRECTORY } from '@src/constants'
-import { DatabaseOperationResult } from '@src/types'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { useEffect } from 'react'
+import { memo, useEffect, useMemo } from 'react'
 import ActionsRow from './ActionsRow'
 
 const classNames = {
@@ -19,65 +17,56 @@ const classNames = {
 }
 const columnHelper = createColumnHelper<FilesDirectory>()
 
-const columns = [
-  columnHelper.display({
-    id: 'select',
-    header: ({ table }) => (
-      <IndeterminateCheckbox
-        {...{
-          checked: table.getIsAllRowsSelected(),
-          indeterminate: table.getIsSomeRowsSelected(),
-          onChange: table.getToggleAllRowsSelectedHandler()
-        }}
-      />
-    ),
-    cell: ({ row }) => (
-      <div className="px-1">
-        <IndeterminateCheckbox
-          {...{
-            checked: row.getIsSelected(),
-            disabled: !row.getCanSelect(),
-            indeterminate: row.getIsSomeSelected(),
-            onChange: row.getToggleSelectedHandler()
-          }}
-        />
-      </div>
-    )
-  }),
-  columnHelper.accessor('id', {
-    id: 'id'
-  }),
-  columnHelper.accessor('path', {
-    id: 'path',
-    cell: (info) => info.getValue(),
-    header: () => <span>Path</span>
-  })
-]
-
 const List = (): JSX.Element => {
-  const { state, dispatch } = useMain()
-  const { rowSelection, setRowSelection, setError } = useTableContext()
+  const { state } = useMain()
+  const { rowSelection, setRowSelection } = useTableContext()
 
   const { status, fetchData } = useFetchDirectories()
-  useIpcListener(NEW_FILES_DIRECTORY, (res: DatabaseOperationResult<FilesDirectory>) => {
-    if (res.success === false) {
-      setError(res.error)
-      return
-    }
-
-    dispatch({
-      type: NEW_FILES_DIRECTORY,
-      payload: {
-        directorySrc: res.data
-      }
-    })
-  })
 
   useEffect(() => {
     fetchData()
   }, [])
 
   const directories = state.directorySrcs
+
+  const columns = useMemo(
+    () => [
+      columnHelper.display({
+        id: 'select',
+        size: 16,
+        header: ({ table }) => (
+          <IndeterminateCheckbox
+            {...{
+              checked: table.getIsAllRowsSelected(),
+              indeterminate: table.getIsSomeRowsSelected(),
+              onChange: table.getToggleAllRowsSelectedHandler()
+            }}
+          />
+        ),
+        cell: ({ row }) => (
+          <div className="pl-8">
+            <IndeterminateCheckbox
+              {...{
+                checked: row.getIsSelected(),
+                disabled: !row.getCanSelect(),
+                indeterminate: row.getIsSomeSelected(),
+                onChange: row.getToggleSelectedHandler()
+              }}
+            />
+          </div>
+        )
+      }),
+      columnHelper.accessor('id', {
+        id: 'id'
+      }),
+      columnHelper.accessor('path', {
+        id: 'path',
+        cell: (info) => info.getValue(),
+        header: () => <span>Path</span>
+      })
+    ],
+    []
+  )
 
   const table = useReactTable({
     data: directories ?? [],
@@ -95,8 +84,11 @@ const List = (): JSX.Element => {
 
   const renderList = (): JSX.Element => {
     if (status === 'loading') {
-      // TODO: need to figure out loading
-      return <span>Loading...</span>
+      return (
+        <div className="h-full w-full flex justify-center items-center">
+          <Loader />
+        </div>
+      )
     }
 
     return (
@@ -111,16 +103,18 @@ const List = (): JSX.Element => {
   return <div className="overflow-x-auto">{renderList()}</div>
 }
 
-export default function Directories(): JSX.Element {
+const MemoizedList = memo(List)
+
+export default memo(function Directories(): JSX.Element {
   return (
     <TableProvider>
       <div className={classNames.container}>
         <div>
           <span className="text-md text-info">Configuration</span>
         </div>
-        <List />
+        <MemoizedList />
         <ActionsRow />
       </div>
     </TableProvider>
   )
-}
+})

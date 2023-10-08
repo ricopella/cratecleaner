@@ -1,7 +1,7 @@
-import { FileInfo } from '@src/types'
 import { createHash } from 'crypto'
 import { createReadStream, promises as fs } from 'fs'
 import { basename, extname, resolve } from 'path'
+import { FileInfo } from '../../types'
 
 const DUPLICATE_FILE_BLACK_LIST = [
   '.DS_Store',
