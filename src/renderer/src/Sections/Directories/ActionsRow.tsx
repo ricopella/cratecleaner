@@ -76,6 +76,13 @@ export default function ActionsRow(): JSX.Element {
     })
 
     dispatch({
+      type: 'ADD_SCAN_TO_ALL_SCANS',
+      payload: {
+        scan
+      }
+    })
+
+    dispatch({
       type: UPDATE_ACTIVE_TAB,
       payload: {
         activeTab: res.data.id

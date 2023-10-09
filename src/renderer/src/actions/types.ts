@@ -1,7 +1,8 @@
-import { CrateSrc, FilesDirectory } from '@prisma/client'
+import { CrateSrc, FilesDirectory, Scan } from '@prisma/client'
 import {
   ADD_DELETED_FILES_RESULT,
   ADD_NEW_SCAN,
+  ADD_SCAN_TO_ALL_SCANS,
   ADD_TRACKING_DELETE_ID,
   CREATE_CRATE_SRC,
   GET_CRATE_SRCS,
@@ -10,6 +11,7 @@ import {
   REMOVE_DIRECTORIES,
   REMOVE_SCAN,
   SET_ERROR_MESSAGE,
+  SET_SCANS_LIST,
   UPDATE_ACTIVE_TAB,
   UPDATE_SCAN_STATUS
 } from '@src/constants'
@@ -21,6 +23,7 @@ export type MainState = {
   directorySrcs: FilesDirectory[]
   error: string | null
   scans: Record<string, ExtendedScan>
+  allScans: Pick<Scan, 'id' | 'createdAt' | 'status'>[]
 }
 
 export interface CreateCrateSrcAction {
@@ -108,6 +111,22 @@ interface SetErrorMessage {
   }
 }
 
+interface SetScans {
+  type: typeof SET_SCANS_LIST
+  payload: {
+    scans: MainState['allScans']
+  }
+}
+
+export type AllScan = Pick<Scan, 'id' | 'createdAt' | 'status'>
+
+interface AddScanToAllScans {
+  type: typeof ADD_SCAN_TO_ALL_SCANS
+  payload: {
+    scan: AllScan
+  }
+}
+
 export type MainActions =
   | CreateCrateSrcAction
   | GetCrateSrcs
@@ -121,6 +140,8 @@ export type MainActions =
   | AddTrackingDeleteId
   | AddDeletedFilesResult
   | SetErrorMessage
+  | SetScans
+  | AddScanToAllScans
 
 export interface MainContextProps {
   state: MainState

@@ -1,24 +1,27 @@
-import { Scan } from '@prisma/client'
 import { getScansList } from '@renderer/actions/ipc'
-import { useTableContext } from '@renderer/context/TableContext'
-import { useEffect, useState } from 'react'
+import { useMain } from '@renderer/context/MainContext'
+import { useEffect } from 'react'
 
-export default function useScansList(): {
-  list: Pick<Scan, 'id' | 'createdAt' | 'status'>[]
-} {
-  const [list, setList] = useState<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>([])
-  const { setError } = useTableContext()
+export default function useScansList(): void {
+  const { dispatch } = useMain()
 
   useEffect(() => {
-    // TODO: handle new results
     getScansList().then((result) => {
       if (result.success) {
-        setList(result.data)
+        dispatch({
+          type: 'SET_SCANS_LIST',
+          payload: {
+            scans: result.data
+          }
+        })
       } else {
-        setError(result.error)
+        dispatch({
+          type: 'SET_ERROR_MESSAGE',
+          payload: {
+            error: result.error
+          }
+        })
       }
     })
   }, [])
-
-  return { list }
 }

@@ -1,6 +1,7 @@
 import {
   ADD_DELETED_FILES_RESULT,
   ADD_NEW_SCAN,
+  ADD_SCAN_TO_ALL_SCANS,
   ADD_TRACKING_DELETE_ID,
   GET_CRATE_SRCS,
   GET_FILES_DIRECTORIES,
@@ -8,16 +9,18 @@ import {
   REMOVE_DIRECTORIES,
   REMOVE_SCAN,
   SET_ERROR_MESSAGE,
+  SET_SCANS_LIST,
   UPDATE_ACTIVE_TAB,
   UPDATE_SCAN_STATUS
 } from '@src/constants'
 
 import { DeletedFilesSchema } from '@src/types'
 import { assocPath, concat, curry, dissoc, uniq, uniqBy } from 'ramda'
-import { MainActions, MainState } from './types'
+import { AllScan, MainActions, MainState } from './types'
 
 export const initialState: MainState = {
   activeTab: 'DIRECTORIES',
+  allScans: [],
   crateSrcs: [],
   directorySrcs: [],
   error: null,
@@ -84,6 +87,14 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
       )
       return updatedState
     }
+    case SET_SCANS_LIST:
+      return assocPath(['allScans'], action.payload.scans, state)
+    case ADD_SCAN_TO_ALL_SCANS:
+      return assocPath(
+        ['allScans'],
+        uniqBy((s: AllScan) => s.id, concat(state.allScans, [action.payload.scan])),
+        state
+      )
     default:
       return state
   }
