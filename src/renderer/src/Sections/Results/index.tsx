@@ -1,8 +1,7 @@
-import { deleteFiles } from '@renderer/actions/ipc'
 import Loader from '@renderer/components/Loader'
+import Body from '@renderer/components/Table/Body'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
-import { ADD_TRACKING_DELETE_ID } from '@src/constants'
 import { DuplicateFile, ResultsData, ScanResults } from '@src/types'
 import {
   ExpandedState,
@@ -11,10 +10,11 @@ import {
   useReactTable
 } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
-import { v4 } from 'uuid'
 import ArrowRight from '../../assets/arrow-right.svg?react'
-import TableBody from './TableBody'
-import TableHeader from './TableHeader'
+import Header from '../../components/Table/Header'
+import ActionsRow from './ActionsRow'
+import ConfigurationPanel from './ConfigurationPanel'
+import DeleteConfirmModal from './DeleteConfirmModal'
 import { transformScanResultsToRows } from './utils'
 
 const classNames = {
@@ -29,7 +29,7 @@ const columns = [
   columnHelper.accessor('id', {
     id: 'id',
     enableGrouping: true,
-    size: 24,
+    size: 16,
     header: undefined,
     cell: ({ row }) => (
       <div
@@ -73,7 +73,8 @@ const columns = [
     enableGrouping: false
   }),
 
-  columnHelper.accessor('files.path', {
+  columnHelper.display({
+    id: 'path',
     header: 'Path',
     cell: (info) => {
       if (info.row.depth === 0) {
@@ -86,8 +87,8 @@ const columns = [
     },
     enableGrouping: false
   }),
-
-  columnHelper.accessor('files.title', {
+  columnHelper.display({
+    id: 'title',
     header: 'Title',
     cell: (info) => {
       if (info.row.depth === 0) {
@@ -96,11 +97,12 @@ const columns = [
 
       const row = info.row.original as unknown as DuplicateFile
 
-      return row?.title ?? ''
+      return row?.metadata?.title ?? ''
     },
     enableGrouping: false
   }),
-  columnHelper.accessor('files.artist', {
+  columnHelper.display({
+    id: 'artist',
     header: 'Artist',
     cell: (info) => {
       if (info.row.depth === 0) {
@@ -109,11 +111,12 @@ const columns = [
 
       const row = info.row.original as unknown as DuplicateFile
 
-      return row?.artist ?? ''
+      return row?.metadata?.artist ?? ''
     },
     enableGrouping: false
   }),
-  columnHelper.accessor('files.album', {
+  columnHelper.display({
+    id: 'album',
     header: 'Album',
     cell: (info) => {
       if (info.row.depth === 0) {
@@ -122,11 +125,12 @@ const columns = [
 
       const row = info.row.original as unknown as DuplicateFile
 
-      return row?.album ?? ''
+      return row?.metadata?.album ?? ''
     },
     enableGrouping: false
   }),
-  columnHelper.accessor('files.genre', {
+  columnHelper.display({
+    id: 'genre',
     header: 'Genre',
     cell: (info) => {
       if (info.row.depth === 0) {
@@ -135,11 +139,12 @@ const columns = [
 
       const row = info.row.original as unknown as DuplicateFile
 
-      return row?.genre ?? ''
+      return row?.metadata?.genre ?? ''
     },
     enableGrouping: false
   }),
-  columnHelper.accessor('files.bpm', {
+  columnHelper.display({
+    id: 'bpm',
     header: 'BPM',
     cell: (info) => {
       if (info.row.depth === 0) {
@@ -148,11 +153,12 @@ const columns = [
 
       const row = info.row.original as unknown as DuplicateFile
 
-      return row?.bpm ?? ''
+      return row?.metadata?.bpm ?? ''
     },
     enableGrouping: false
   }),
-  columnHelper.accessor('files.type', {
+  columnHelper.display({
+    id: 'type',
     header: 'Type',
     cell: (info) => {
       if (info.row.depth === 0) {
@@ -166,7 +172,8 @@ const columns = [
     enableGrouping: false,
     size: 32
   }),
-  columnHelper.accessor('files.crates', {
+  columnHelper.display({
+    id: 'crates',
     header: 'Crates',
     cell: (info) => {
       if (info.row.depth === 0) {
@@ -188,8 +195,9 @@ const columns = [
     enableGrouping: false
   })
 ]
+
 export default function Results({ id }: { id: string }): JSX.Element {
-  const { state, dispatch } = useMain()
+  const { state } = useMain()
   const scan = state.scans[id]
   const results: ScanResults = scan.results ?? { files: {} }
   const [expanded, setExpanded] = useState<ExpandedState>({})
@@ -199,7 +207,6 @@ export default function Results({ id }: { id: string }): JSX.Element {
     return transformScanResultsToRows(results, scan)
   }, [results, scan])
 
-  // Create an instance of the table
   const table = useReactTable<ResultsData>({
     data,
     columns,
@@ -209,7 +216,7 @@ export default function Results({ id }: { id: string }): JSX.Element {
     onRowSelectionChange: setSelected,
     getSubRows: (row) => {
       return row.files.map((file, fileIndex) => ({
-        id: `${row.id}-${fileIndex}`, // Generate a unique ID for the sub-row
+        id: `${row.id}-${fileIndex}`,
         name: file.name,
         path: file.path,
         type: file.type,
@@ -230,10 +237,6 @@ export default function Results({ id }: { id: string }): JSX.Element {
     columnResizeMode: 'onChange'
   })
 
-  const selectedCount = useMemo(() => {
-    return Object.values(selected).filter(Boolean).length
-  }, [selected])
-
   const onShowPrompt = (): void => {
     const element = document.getElementById('modal') as HTMLDialogElement | null
 
@@ -242,85 +245,45 @@ export default function Results({ id }: { id: string }): JSX.Element {
     }
   }
 
-  const onDelete = async (): Promise<void> => {
-    const filesToDelete = Object.keys(selected).map((key) => {
-      const [rowId, fileIndex] = key.split('.')
-      return data[Number(rowId)].files[Number(fileIndex)].path
-    })
+  const selectedCount = useMemo(() => {
+    return Object.values(selected).filter(Boolean).length
+  }, [selected])
 
-    // generate new uuid
-    const deleteId = v4()
-
-    // add to tracking to state so it can pool for results
-    dispatch({
-      type: ADD_TRACKING_DELETE_ID,
-      payload: {
-        deleteId: deleteId,
-        scanId: id
-      }
-    })
-
-    await deleteFiles(filesToDelete, id, deleteId)
-
+  const resetSelected = (): void => {
     setSelected({})
   }
-  console.log({ scan })
+
+  const renderContent = (): JSX.Element => {
+    if (scan.status === 'pending') {
+      return (
+        <div className="h-full w-full flex justify-center items-center">
+          <Loader />
+        </div>
+      )
+    }
+
+    return (
+      <table className={classNames.table}>
+        <Header<ResultsData> headerGroups={table.getHeaderGroups()} />
+        <Body table={table} noResultsMessage="No duplicate files found in this scan." />
+      </table>
+    )
+  }
+
   return (
     <>
       <div className={classNames.container}>
-        <div>
-          {scan.deletedFiles.map((del) => (
-            <div key={del.id}>{del.count}</div>
-          ))}
-        </div>
-        <div className={classNames.tableContainer}>
-          {scan.status === 'pending' ? (
-            <div className="h-full w-full flex justify-center items-center">
-              <Loader />
-            </div>
-          ) : (
-            <table className={classNames.table}>
-              <TableHeader table={table} />
-              <TableBody table={table} />
-            </table>
-          )}
-        </div>
-        <div className="grid grid-cols-max-max gap-2">
-          <button
-            className={`btn btn-warning btn-sm ${selectedCount > 0 ? '' : 'btn-disabled'}`}
-            disabled={selectedCount > 0 ? false : true}
-            onClick={onShowPrompt}
-          >
-            Delete {selectedCount}
-          </button>
-          <button
-            className={`btn btn-neutral btn-sm ${selectedCount > 0 ? '' : 'btn-disabled'}`}
-            disabled={selectedCount > 0 ? false : true}
-            onClick={(): void => setSelected({})}
-          >
-            Reset
-          </button>
-        </div>
+        <ConfigurationPanel id={id} />
+        <div className={classNames.tableContainer}>{renderContent()}</div>
+        <ActionsRow reset={resetSelected} selectedCount={selectedCount} showPrompt={onShowPrompt} />
       </div>
-      <dialog id="modal" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Delete files</h3>
-          <p className="py-4 text-warning">
-            Are you sure you want to delete {selectedCount} file(s). This can not be un-dune or
-            restored. The files will be permanently removed.
-          </p>
-          <div className="modal-action">
-            <form method="dialog">
-              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-            </form>
-            <div>
-              <button className="btn btn-warning btn-sm" onClick={onDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      </dialog>
+      <DeleteConfirmModal
+        id={id}
+        selected={selected}
+        reset={resetSelected}
+        data={data}
+        selectedCount={selectedCount}
+      />
     </>
   )
 }

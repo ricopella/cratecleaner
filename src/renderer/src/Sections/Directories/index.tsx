@@ -1,7 +1,6 @@
 import { FilesDirectory } from '@prisma/client'
 import Loader from '@renderer/components/Loader'
 import Body from '@renderer/components/Table/Body'
-import TableFooter from '@renderer/components/Table/Footer'
 import TableHeader from '@renderer/components/Table/Header'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
@@ -94,8 +93,10 @@ const List = (): JSX.Element => {
     return (
       <table className={classNames.table}>
         <TableHeader<FilesDirectory> headerGroups={table.getHeaderGroups()} />
-        <Body<FilesDirectory> rows={table.getRowModel().rows} />
-        <TableFooter<FilesDirectory> footerGroups={table.getFooterGroups()} />
+        <Body<FilesDirectory>
+          table={table}
+          noResultsMessage="No directories selected. Use the buttons below to add/remove directories to scan."
+        />
       </table>
     )
   }
