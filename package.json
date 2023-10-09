@@ -4,7 +4,7 @@
   "description": "Cleanup your crates & files",
   "main": "./out/main/index.js",
   "author": "Narin Rico Sundarabhaya",
-  "homepage": "https://www.electronjs.org",
+  "homepage": "polyhedronprojects.com",
   "scripts": {
     "build:linux": "NODE_ENV=development && electron-vite build && electron-builder --linux --config",
     "build:mac": "NODE_ENV=development && electron-vite build && electron-builder --mac --config",
@@ -31,9 +31,9 @@
     "date-fns": "^2.30.0",
     "electron-devtools-installer": "^3.2.0",
     "electron-updater": "^6.1.1",
-    "framer-motion": "^10.16.4",
     "music-metadata": "7.13.4",
     "ramda": "^0.29.0",
+    "react-loader-spinner": "^5.4.5",
     "tailwindcss": "^3.3.3",
     "uuid": "^9.0.1",
     "zod": "^3.22.2"
