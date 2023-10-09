@@ -20,9 +20,12 @@ export const MainProvider: React.FC<MainProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(directoryReducer, initialState)
   useIpcListener(NEW_FILES_DIRECTORY, (res: DatabaseOperationResult<FilesDirectory>) => {
     if (res.success === false) {
-      //  TODO:move error to this state
-      // setError(res.error)
-
+      dispatch({
+        type: 'SET_ERROR_MESSAGE',
+        payload: {
+          error: res.error
+        }
+      })
       return
     }
 

@@ -7,6 +7,7 @@ import {
   NEW_FILES_DIRECTORY,
   REMOVE_DIRECTORIES,
   REMOVE_SCAN,
+  SET_ERROR_MESSAGE,
   UPDATE_ACTIVE_TAB,
   UPDATE_SCAN_STATUS
 } from '@src/constants'
@@ -19,6 +20,7 @@ export const initialState: MainState = {
   activeTab: 'DIRECTORIES',
   crateSrcs: [],
   directorySrcs: [],
+  error: null,
   scans: {}
 }
 
@@ -34,6 +36,8 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
         uniq(concat(state.directorySrcs, [action.payload.directorySrc])),
         state
       )
+    case SET_ERROR_MESSAGE:
+      return assocPath(['error'], action.payload.error, state)
     case REMOVE_DIRECTORIES:
       return assocPath(
         ['directorySrcs'],

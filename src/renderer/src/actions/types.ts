@@ -9,16 +9,18 @@ import {
   NEW_FILES_DIRECTORY,
   REMOVE_DIRECTORIES,
   REMOVE_SCAN,
+  SET_ERROR_MESSAGE,
   UPDATE_ACTIVE_TAB,
   UPDATE_SCAN_STATUS
 } from '@src/constants'
 import { DeletedFilesSchema, ExtendedScan } from '@src/types'
 
 export type MainState = {
+  activeTab: string // DIRECTORIES or uuid if result
   crateSrcs: CrateSrc[]
   directorySrcs: FilesDirectory[]
+  error: string | null
   scans: Record<string, ExtendedScan>
-  activeTab: string // DIRECTORIES or uuid if result
 }
 
 export interface CreateCrateSrcAction {
@@ -99,6 +101,13 @@ interface AddDeletedFilesResult {
   }
 }
 
+interface SetErrorMessage {
+  type: typeof SET_ERROR_MESSAGE
+  payload: {
+    error: string | null
+  }
+}
+
 export type MainActions =
   | CreateCrateSrcAction
   | GetCrateSrcs
@@ -111,6 +120,7 @@ export type MainActions =
   | RemoveScan
   | AddTrackingDeleteId
   | AddDeletedFilesResult
+  | SetErrorMessage
 
 export interface MainContextProps {
   state: MainState

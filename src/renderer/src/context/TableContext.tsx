@@ -1,4 +1,5 @@
 import { TableContextProps } from '@src/types'
+import { ExpandedState } from '@tanstack/react-table'
 import React, { ReactNode, createContext, useContext, useState } from 'react'
 
 const TableContext = createContext<TableContextProps | undefined>(undefined)
@@ -9,10 +10,10 @@ interface TableProviderProps {
 
 export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
-  const [error, setError] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState<ExpandedState>({})
 
   return (
-    <TableContext.Provider value={{ rowSelection, setRowSelection, error, setError }}>
+    <TableContext.Provider value={{ rowSelection, setRowSelection, expanded, setExpanded }}>
       {children}
     </TableContext.Provider>
   )

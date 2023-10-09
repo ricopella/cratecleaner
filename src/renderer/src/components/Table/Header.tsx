@@ -6,7 +6,7 @@ interface TableHeaderProps<D extends object> {
 
 const TableHeader = <T extends object>({ headerGroups }: TableHeaderProps<T>): JSX.Element => {
   return (
-    <thead className="sticky top-0 bg-base-200 z-10">
+    <thead className="sticky top-0 bg-base-200">
       {headerGroups.map((headerGroup) => (
         <tr key={headerGroup.id}>
           {headerGroup.headers.map((header) => (

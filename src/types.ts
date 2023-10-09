@@ -1,4 +1,5 @@
 import { Scan } from '@prisma/client'
+import { ExpandedState } from '@tanstack/react-table'
 import { z } from 'zod'
 import { Metadata } from './main/handlers/audioMetadata'
 
@@ -7,10 +8,10 @@ export type DatabaseOperationResult<T> =
   | { success: false; error: string }
 
 export interface TableContextProps {
+  expanded: ExpandedState
+  setExpanded: React.Dispatch<React.SetStateAction<ExpandedState>>
   rowSelection: Record<string, boolean>
   setRowSelection: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
-  error: string | null
-  setError: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 export type FileInfo = {

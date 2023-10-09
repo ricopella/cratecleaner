@@ -15,7 +15,7 @@ const classNames = {
 
 export default function ActionsRow(): JSX.Element {
   const { state, dispatch } = useMain()
-  const { error, rowSelection, setError, setRowSelection } = useTableContext()
+  const { rowSelection, setRowSelection } = useTableContext()
 
   const handleRemoveDirectories = async (): Promise<void> => {
     const rowsToDelete = keys(rowSelection)
@@ -29,7 +29,12 @@ export default function ActionsRow(): JSX.Element {
     const res = await removeDirectories(deleteKeys)
 
     if (res.success === false) {
-      setError(res.error)
+      dispatch({
+        type: 'SET_ERROR_MESSAGE',
+        payload: {
+          error: res.error
+        }
+      })
       return
     }
 
@@ -49,7 +54,12 @@ export default function ActionsRow(): JSX.Element {
       directoryPaths: state.directorySrcs.map((directory) => directory.path)
     })
     if (res.success === false) {
-      setError(res.error)
+      dispatch({
+        type: 'SET_ERROR_MESSAGE',
+        payload: {
+          error: res.error
+        }
+      })
       return
     }
 
@@ -86,7 +96,7 @@ export default function ActionsRow(): JSX.Element {
         -
       </button>
       <div className={classNames.errorContainer}>
-        <ErrorMessage error={error} />
+        <ErrorMessage error={state.error} />
       </div>
       <PreviousResults />
       <button

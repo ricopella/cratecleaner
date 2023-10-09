@@ -2,14 +2,10 @@ import Loader from '@renderer/components/Loader'
 import Body from '@renderer/components/Table/Body'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
+import { TableProvider, useTableContext } from '@renderer/context/TableContext'
 import { DuplicateFile, ResultsData, ScanResults } from '@src/types'
-import {
-  ExpandedState,
-  createColumnHelper,
-  getCoreRowModel,
-  useReactTable
-} from '@tanstack/react-table'
-import { useMemo, useState } from 'react'
+import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { useMemo } from 'react'
 import ArrowRight from '../../assets/arrow-right.svg?react'
 import Header from '../../components/Table/Header'
 import ActionsRow from './ActionsRow'
@@ -196,12 +192,11 @@ const columns = [
   })
 ]
 
-export default function Results({ id }: { id: string }): JSX.Element {
+const Table = ({ id }: { id: string }): JSX.Element => {
   const { state } = useMain()
+  const { expanded, setExpanded, rowSelection, setRowSelection } = useTableContext()
   const scan = state.scans[id]
   const results: ScanResults = scan.results ?? { files: {} }
-  const [expanded, setExpanded] = useState<ExpandedState>({})
-  const [selected, setSelected] = useState<Record<string, boolean>>({})
 
   const data: ResultsData[] = useMemo(() => {
     return transformScanResultsToRows(results, scan)
@@ -213,7 +208,7 @@ export default function Results({ id }: { id: string }): JSX.Element {
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
     onExpandedChange: setExpanded,
-    onRowSelectionChange: setSelected,
+    onRowSelectionChange: setRowSelection,
     getSubRows: (row) => {
       return row.files.map((file, fileIndex) => ({
         id: `${row.id}-${fileIndex}`,
@@ -231,26 +226,18 @@ export default function Results({ id }: { id: string }): JSX.Element {
     },
     state: {
       expanded,
-      rowSelection: selected
+      rowSelection: rowSelection
     },
     debugTable: true,
     columnResizeMode: 'onChange'
   })
 
-  const onShowPrompt = (): void => {
-    const element = document.getElementById('modal') as HTMLDialogElement | null
-
-    if (element) {
-      element.showModal()
-    }
-  }
-
   const selectedCount = useMemo(() => {
-    return Object.values(selected).filter(Boolean).length
-  }, [selected])
+    return Object.values(rowSelection).filter(Boolean).length
+  }, [rowSelection])
 
   const resetSelected = (): void => {
-    setSelected({})
+    setRowSelection({})
   }
 
   const renderContent = (): JSX.Element => {
@@ -263,27 +250,33 @@ export default function Results({ id }: { id: string }): JSX.Element {
     }
 
     return (
-      <table className={classNames.table}>
-        <Header<ResultsData> headerGroups={table.getHeaderGroups()} />
-        <Body table={table} noResultsMessage="No duplicate files found in this scan." />
-      </table>
+      <>
+        <table className={classNames.table}>
+          <Header<ResultsData> headerGroups={table.getHeaderGroups()} />
+          <Body table={table} noResultsMessage="No duplicate files found in this scan." />
+        </table>
+        <DeleteConfirmModal
+          id={id}
+          selected={rowSelection}
+          reset={resetSelected}
+          data={data}
+          selectedCount={selectedCount}
+        />
+      </>
     )
   }
 
+  return <div className={classNames.tableContainer}>{renderContent()}</div>
+}
+
+export default function Results({ id }: { id: string }): JSX.Element {
   return (
-    <>
+    <TableProvider>
       <div className={classNames.container}>
         <ConfigurationPanel id={id} />
-        <div className={classNames.tableContainer}>{renderContent()}</div>
-        <ActionsRow reset={resetSelected} selectedCount={selectedCount} showPrompt={onShowPrompt} />
+        <Table id={id} />
+        <ActionsRow />
       </div>
-      <DeleteConfirmModal
-        id={id}
-        selected={selected}
-        reset={resetSelected}
-        data={data}
-        selectedCount={selectedCount}
-      />
-    </>
+    </TableProvider>
   )
 }
