@@ -9,10 +9,11 @@ import useFetchDirectories from '@renderer/hooks/useDirectoriesList'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { memo, useEffect, useMemo } from 'react'
 import ActionsRow from './ActionsRow'
+import ConfigurationPanel from './ConfigurationPanel'
 
 const classNames = {
   container: 'h-full w-full grid grid-rows-max-1fr-max',
-  table: 'table table-xs'
+  table: 'table table-xs padding-sm w-full'
 }
 const columnHelper = createColumnHelper<FilesDirectory>()
 
@@ -43,7 +44,7 @@ const List = (): JSX.Element => {
           />
         ),
         cell: ({ row }) => (
-          <div className="pl-8">
+          <div>
             <IndeterminateCheckbox
               {...{
                 checked: row.getIsSelected(),
@@ -104,16 +105,12 @@ const List = (): JSX.Element => {
   return <div className="overflow-x-auto">{renderList()}</div>
 }
 
-const MemoizedList = memo(List)
-
 export default memo(function Directories(): JSX.Element {
   return (
     <TableProvider>
       <div className={classNames.container}>
-        <div>
-          <span className="text-md text-info">Configuration</span>
-        </div>
-        <MemoizedList />
+        <ConfigurationPanel />
+        <List />
         <ActionsRow />
       </div>
     </TableProvider>

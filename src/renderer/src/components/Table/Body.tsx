@@ -18,7 +18,7 @@ const TableBody = <T extends object>({
       ) : (
         table.getRowModel().rows.map((row, i) => {
           const isEvenRow = i % 2 === 0
-          const bgColorClass = isEvenRow ? 'bg-base-100' : 'bg-base-300'
+          const bgColorClass = isEvenRow ? 'bg-base-300' : 'bg-base-100'
 
           return (
             <>

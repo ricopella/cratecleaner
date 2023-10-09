@@ -13,5 +13,9 @@ export default function IndeterminateCheckbox({
     }
   }, [ref, indeterminate])
 
-  return <input type="checkbox" ref={ref} className={className + ' cursor-pointer'} {...rest} />
+  return (
+    <div className="flex items-center">
+      <input type="checkbox" ref={ref} className={className + ' cursor-pointer'} {...rest} />
+    </div>
+  )
 }
