@@ -2,10 +2,11 @@ import Directories from '@renderer/Sections/Directories'
 import { useMain } from '@renderer/context/MainContext'
 import { REMOVE_SCAN, UPDATE_ACTIVE_TAB } from '@src/constants'
 import { keys } from 'ramda'
-import { Suspense, lazy, memo, useMemo } from 'react'
+import { Suspense, lazy, memo, useMemo, useState } from 'react'
 import Loader from './Loader'
 
 const LazyResults = lazy(() => import('@renderer/Sections/Results'))
+const LazySettings = lazy(() => import('@renderer/Sections/Settings'))
 
 const classNames = {
   container: 'h-screen p-4 grid grid-rows-max-1fr',
@@ -16,6 +17,7 @@ const classNames = {
 
 function SectionTabs(): JSX.Element {
   const { state, dispatch } = useMain()
+  const [settingsIsShown, setSettingsIsShown] = useState<boolean>(false)
 
   const handleTabClick = (tabId: string): void => {
     dispatch({
@@ -44,6 +46,14 @@ function SectionTabs(): JSX.Element {
 
   const activeTab = useMemo(() => state.activeTab, [state.activeTab])
 
+  const renderContent = (): JSX.Element => {
+    if (activeTab === 'SETTINGS') {
+      return <LazySettings />
+    }
+
+    return activeTab === 'DIRECTORIES' ? <Directories /> : <LazyResults id={activeTab} />
+  }
+
   return (
     <div className={classNames.container}>
       <div className={classNames.tabs}>
@@ -52,6 +62,12 @@ function SectionTabs(): JSX.Element {
           onClick={(): void => handleTabClick('DIRECTORIES')}
         >
           Directories
+        </a>
+        <a
+          className={`${classNames.tab} ${activeTab === 'SETTINGS' ? 'tab-active' : ''}`}
+          onClick={(): void => handleTabClick('SETTINGS')}
+        >
+          Settings
         </a>
         {keys(state.scans).map((scanId) => (
           <a
@@ -74,6 +90,7 @@ function SectionTabs(): JSX.Element {
           </a>
         ))}
       </div>
+
       <Suspense
         fallback={
           <div className={`fixed inset-0 flex items-center justify-center`}>
@@ -81,9 +98,7 @@ function SectionTabs(): JSX.Element {
           </div>
         }
       >
-        <div className={classNames.contentContainer}>
-          {activeTab === 'DIRECTORIES' ? <Directories /> : <LazyResults id={activeTab} />}
-        </div>
+        <div className={classNames.contentContainer}>{renderContent()}</div>
       </Suspense>
     </div>
   )

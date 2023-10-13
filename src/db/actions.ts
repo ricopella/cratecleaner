@@ -32,13 +32,17 @@ async function performDatabaseOperation<T>(
   }
 }
 
-export const createCrateSrc = (src: string) =>
+export const createCrateSrc = (src: string): Promise<DatabaseOperationResult<CrateSrc>> =>
   performDatabaseOperation<CrateSrc>(() =>
     prisma.crateSrc.create({ data: { path: src, type: 'SERATO' } })
   )
 
 export const getCrateSrcs = (): Promise<DatabaseOperationResult<CrateSrc[]>> =>
   performDatabaseOperation<CrateSrc[]>(() => prisma.crateSrc.findMany())
+
+export const removeCrateSrcs = (id: string): Promise<DatabaseOperationResult<CrateSrc>> =>
+  performDatabaseOperation<CrateSrc>(() => prisma.crateSrc.delete({ where: { id } }))
+
 export const createFilesDirectory = (
   path: string
 ): Promise<DatabaseOperationResult<FilesDirectory>> =>
@@ -129,5 +133,18 @@ export const getDeleteFilesById = (
 ): Promise<DatabaseOperationResult<DeletedFiles | null>> => {
   return performDatabaseOperation<DeletedFiles | null>(() => {
     return prisma.deletedFiles.findUnique({ where: { id } })
+  })
+}
+
+export const getDeletedFilesCount = (): Promise<
+  DatabaseOperationResult<Pick<DeletedFiles, 'id' | 'count'>[]>
+> => {
+  return performDatabaseOperation<Pick<DeletedFiles, 'id' | 'count'>[]>(() => {
+    return prisma.deletedFiles.findMany({
+      select: {
+        id: true,
+        count: true
+      }
+    })
   })
 }

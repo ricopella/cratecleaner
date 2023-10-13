@@ -1,8 +1,10 @@
 import { ipcMain } from 'electron'
 import {
   ADD_NEW_SCAN,
+  DELETE_CRATE_SRC,
   DELETE_FILES,
   GET_CRATE_SRCS,
+  GET_DELETED_FILES_COUNT,
   GET_DELETE_FILES_BY_ID,
   GET_FILES_DIRECTORIES,
   GET_SCANS_LIST,
@@ -14,9 +16,11 @@ import {
   deleteFiles,
   getCrateSrcs,
   getDeleteFilesById,
+  getDeletedFilesCount,
   getFilesDirectories,
   getScanById,
   getScansList,
+  removeCrateSrcs,
   removeDirectories,
   updateScanById
 } from '../../db/actions'
@@ -29,6 +33,12 @@ import { getDuplicatesWithMetadata } from './utils'
 export const registerQueryHandler = (): void => {
   ipcMain.handle(GET_CRATE_SRCS, async () => {
     const result = await getCrateSrcs()
+
+    return result
+  })
+
+  ipcMain.handle(DELETE_CRATE_SRC, async (_: unknown, id: string) => {
+    const result = await removeCrateSrcs(id)
 
     return result
   })
@@ -100,5 +110,17 @@ export const registerQueryHandler = (): void => {
   ipcMain.handle(GET_DELETE_FILES_BY_ID, async (_: unknown, id: string) => {
     const result = await getDeleteFilesById(id)
     return result
+  })
+
+  ipcMain.handle(GET_DELETED_FILES_COUNT, async () => {
+    const result = await getDeletedFilesCount()
+    if (!result.success) {
+      return result
+    }
+
+    return {
+      success: true,
+      data: result.data.reduce((acc, curr) => acc + curr.count, 0)
+    }
   })
 }

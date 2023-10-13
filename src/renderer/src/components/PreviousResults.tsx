@@ -7,7 +7,7 @@ import { useMemo } from 'react'
 const classNames = {
   dropdown: 'dropdown dropdown-top',
   btn: 'btn btn-sm',
-  ul: 'dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52'
+  ul: 'dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52  max-h-80 flex-nowrap overflow-y-auto'
 }
 
 export default function PreviousResults(): JSX.Element {

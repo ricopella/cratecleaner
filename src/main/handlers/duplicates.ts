@@ -27,29 +27,55 @@ async function* getFiles(dir: string): AsyncGenerator<string> {
     }
   }
 }
+interface ProcessBatchOptions {
+  type?: 'content' | 'name'
+}
 
-async function processBatch(paths: string[]): Promise<{ hash: string; info: FileInfo }[]> {
+async function processBatch(
+  paths: string[],
+  options: ProcessBatchOptions = {}
+): Promise<{ hash: string; info: FileInfo }[]> {
+  const { type = 'name' } = options
   const results: { hash: string; info: FileInfo }[] = []
+
   for (const path of paths) {
-    const hash = createHash('md5')
-    const stream = createReadStream(path)
-    stream.on('data', (chunk) => hash.update(chunk))
-    await new Promise((resolve) => stream.on('end', resolve))
+    if (type === 'content') {
+      // Check by content
+      const hash = createHash('md5')
+      const stream = createReadStream(path)
+      stream.on('data', (chunk) => hash.update(chunk))
+      await new Promise((resolve) => stream.on('end', resolve))
 
-    const name = basename(path)
+      const name = basename(path)
 
-    if (DUPLICATE_FILE_BLACK_LIST.includes(name)) {
-      continue
+      if (DUPLICATE_FILE_BLACK_LIST.includes(name)) {
+        continue
+      }
+
+      const fileInfo: FileInfo = {
+        path,
+        name,
+        type: extname(path).substring(1)
+      }
+
+      results.push({ hash: hash.digest('hex'), info: fileInfo })
+    } else {
+      // Check by name
+      const name = basename(path)
+      if (DUPLICATE_FILE_BLACK_LIST.includes(name)) {
+        continue
+      }
+
+      const fileInfo: FileInfo = {
+        path,
+        name,
+        type: extname(path).substring(1)
+      }
+
+      results.push({ hash: name, info: fileInfo })
     }
-
-    const fileInfo: FileInfo = {
-      path,
-      name,
-      type: extname(path).substring(1)
-    }
-
-    results.push({ hash: hash.digest('hex'), info: fileInfo })
   }
+
   return results
 }
 
