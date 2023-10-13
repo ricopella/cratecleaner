@@ -24,7 +24,12 @@ export const initialState: MainState = {
   crateSrcs: [],
   directorySrcs: [],
   error: null,
-  scans: {}
+  scans: {},
+  scanConfiguration: {
+    type: 'audio',
+    includeCrates: true,
+    matchType: 'name'
+  }
 }
 
 export function directoryReducer(state: MainState, action: MainActions): MainState {
@@ -95,6 +100,12 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
         uniqBy((s: AllScan) => s.id, concat(state.allScans, [action.payload.scan])),
         state
       )
+    case 'UPDATE_SCAN_CONFIGURATION_TYPE':
+      return assocPath(['scanConfiguration', 'type'], action.payload.type, state)
+    case 'UPDATE_SCAN_CONFIGURATION_MATCH_TYPE':
+      return assocPath(['scanConfiguration', 'matchType'], action.payload.matchType, state)
+    case 'UPDATE_SCAN_CONFIGURATION_INCLUDE_CRATES':
+      return assocPath(['scanConfiguration', 'includeCrates'], action.payload.includeCrates, state)
     default:
       return state
   }

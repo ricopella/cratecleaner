@@ -49,9 +49,11 @@ export default function ActionsRow(): JSX.Element {
   }
 
   const handleNewScan = async (): Promise<void> => {
-    // insert new scan
     const res = await insertScan({
-      directoryPaths: state.directorySrcs.map((directory) => directory.path)
+      directoryPaths: state.directorySrcs.map((directory) => directory.path),
+      includeCrates: state.scanConfiguration.includeCrates,
+      matchType: state.scanConfiguration.matchType,
+      type: state.scanConfiguration.type
     })
     if (res.success === false) {
       dispatch({

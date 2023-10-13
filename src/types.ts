@@ -28,7 +28,10 @@ export type FileWithMetadata = FileInfo & {
 export type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export const ScanConfigurationSchema = z.object({
-  directoryPaths: z.array(z.string())
+  directoryPaths: z.array(z.string()),
+  type: z.enum(['audio', 'image']),
+  includeCrates: z.boolean(),
+  matchType: z.enum(['contents', 'name', 'size'])
 })
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>

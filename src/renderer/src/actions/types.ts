@@ -24,6 +24,11 @@ export type MainState = {
   error: string | null
   scans: Record<string, ExtendedScan>
   allScans: Pick<Scan, 'id' | 'createdAt' | 'status'>[]
+  scanConfiguration: {
+    type: 'audio' | 'image'
+    includeCrates: boolean
+    matchType: 'contents' | 'name' | 'size'
+  }
 }
 
 export interface CreateCrateSrcAction {
@@ -127,6 +132,27 @@ interface AddScanToAllScans {
   }
 }
 
+interface UpdateScanConfigurationType {
+  type: 'UPDATE_SCAN_CONFIGURATION_TYPE'
+  payload: {
+    type: 'audio' | 'image'
+  }
+}
+
+interface UpdateScanConfigurationIncludeCrates {
+  type: 'UPDATE_SCAN_CONFIGURATION_INCLUDE_CRATES'
+  payload: {
+    includeCrates: boolean
+  }
+}
+
+interface UpdateScanConfigurationMatchType {
+  type: 'UPDATE_SCAN_CONFIGURATION_MATCH_TYPE'
+  payload: {
+    matchType: 'contents' | 'name' | 'size'
+  }
+}
+
 export type MainActions =
   | CreateCrateSrcAction
   | GetCrateSrcs
@@ -142,6 +168,9 @@ export type MainActions =
   | SetErrorMessage
   | SetScans
   | AddScanToAllScans
+  | UpdateScanConfigurationType
+  | UpdateScanConfigurationIncludeCrates
+  | UpdateScanConfigurationMatchType
 
 export interface MainContextProps {
   state: MainState
