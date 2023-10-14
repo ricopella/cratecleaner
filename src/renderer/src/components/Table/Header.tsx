@@ -13,10 +13,15 @@ const TableHeader = <T extends object>({ headerGroups }: TableHeaderProps<T>): J
             <th
               key={header.id}
               colSpan={header.colSpan}
-              className="relative group"
+              className={`relative group ${
+                header.column.getCanSort() ? 'cursor-pointer select-none' : ''
+              }`}
               style={{
                 width: header.getSize()
               }}
+              onClick={(): ((event: unknown) => void) | undefined =>
+                header.column.getToggleSortingHandler()
+              }
             >
               {header.isPlaceholder ? null : (
                 <div>{flexRender(header.column.columnDef.header, header.getContext())}</div>

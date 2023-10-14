@@ -36,7 +36,6 @@ export async function processBatch(paths: string[]): Promise<Metadata[]> {
       const mimeType = await getAudioMimeType(path)
       if (!mimeType) {
         console.error(`Could not get mime type for file: ${path}`)
-        // TODO: how to handle non-audio files?
         continue
       }
       const metadata = await parseBuffer(buffer, { mimeType })

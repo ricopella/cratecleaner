@@ -86,6 +86,9 @@ export const getScansList = (): Promise<
 > => {
   return performDatabaseOperation<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(() =>
     prisma.scan.findMany({
+      where: {
+        status: 'completed'
+      },
       select: {
         id: true,
         createdAt: true,

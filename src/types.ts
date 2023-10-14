@@ -37,19 +37,19 @@ export const ScanConfigurationSchema = z.object({
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>
 
 const fileMetadata = z.object({
-  album: z.string().optional(),
-  artist: z.string().optional(),
-  genre: z.array(z.string()).optional(),
-  title: z.string().optional(),
-  comment: z.array(z.string()).optional(),
-  bpm: z.number().optional()
+  album: z.string().nullish(),
+  artist: z.string().nullish(),
+  genre: z.array(z.string()).nullish(),
+  title: z.string().nullish(),
+  comment: z.array(z.string()).nullish(),
+  bpm: z.number().nullish()
 })
 
 const duplicateFile = z.object({
   name: z.string(),
   path: z.string(),
   type: z.string(),
-  metadata: fileMetadata.nullable().optional(),
+  metadata: fileMetadata.nullish(),
   crates: z.array(z.string())
 })
 

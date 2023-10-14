@@ -35,11 +35,16 @@ export default function PreviousResults(): JSX.Element {
                   id: scan.id,
                   scan: {
                     ...scan,
-                    status: 'pending', // TODO: consider adding anew status just for getting completed ones - if retreived, and status is still pending. should not poll. Will avoid bug of a never ended scan
+                    status: 'ready',
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     results: { files: {} },
-                    configuration: { directoryPaths: [] },
+                    configuration: {
+                      directoryPaths: [],
+                      type: 'audio',
+                      matchType: 'name',
+                      includeCrates: false
+                    },
                     deletedFiles: []
                   }
                 }

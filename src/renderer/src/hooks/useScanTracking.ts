@@ -4,14 +4,6 @@ import { transformScan } from '@renderer/utils/transformScan'
 import { UPDATE_SCAN_STATUS } from '@src/constants'
 import { useEffect } from 'react'
 
-/**
- * This hook is used to track the status of a scan.
- * It will poll the backend every 2 seconds to check if the status has changed.
- * If the status has changed, it will update the state.
- * If the status is still pending after 3 minutes, it will stop polling.
- *
- * If a new id is added to scans state, this hook will start tracking it.
- */
 const useScanTracking = ({
   state,
   dispatch
@@ -26,18 +18,63 @@ const useScanTracking = ({
     Object.keys(state.scans).forEach((id) => {
       const scan = state.scans[id]
 
-      // TODO: fix this - will not work when referencing older scans
-      // const currentTime = new Date().getTime()
-      // const createdAtTime = new Date(scan.createdAt).getTime()
-      // const timeDifference = (currentTime - createdAtTime) / (1000 * 60)
+      const handleScan = async (): Promise<void> => {
+        if (scan.status === 'pending') {
+          let elapsed = 0 // Initialize elapsed time
+          let interval = 2000 // Start with a 2-second interval
 
-      if (scan.status === 'pending') {
-        const intervalId = setInterval(async () => {
-          // Fetch the latest status from your backend
-          const scanRes = await fetchScanStatusById(id)
-          console.log({ scanRes })
-          if (scanRes.success === false) {
+          const pollFunction = async (): Promise<void> => {
+            elapsed += interval // Update elapsed time
+
+            // Adjust interval based on elapsed time
+            if (elapsed >= 1 * 60 * 1000 && elapsed < 2 * 60 * 1000) {
+              interval = 5000 // Change to 5 seconds after 1 minute
+            } else if (elapsed >= 2 * 60 * 1000 && elapsed < 3 * 60 * 1000) {
+              interval = 20000 // Change to 20 seconds after 2 minutes
+            } else if (elapsed >= 3 * 60 * 1000) {
+              interval = 30000 // Change to 30 seconds after 3 minutes
+            }
+
+            // Fetch the latest status from your backend
+            const scanRes = await fetchScanStatusById(id)
+
+            if (scanRes.success === false) {
+              clearInterval(intervalId)
+              dispatch({
+                type: 'SET_ERROR_MESSAGE',
+                payload: {
+                  error: scanRes.error
+                }
+              })
+              return
+            }
+
+            if (scanRes.data.status !== 'pending') {
+              clearInterval(intervalId)
+
+              const scan = transformScan(scanRes.data)
+
+              dispatch({
+                type: UPDATE_SCAN_STATUS,
+                payload: scan
+              })
+            }
+
+            // Update the interval
             clearInterval(intervalId)
+            intervalIds.splice(intervalIds.indexOf(intervalId), 1) // Remove old intervalId
+            intervalId = setInterval(pollFunction, interval) // Update intervalId with new interval
+            intervalIds.push(intervalId) // Store new intervalId
+          }
+
+          let intervalId = setInterval(pollFunction, interval) // Initial setInterval
+          intervalIds.push(intervalId) // Store initial intervalId
+        }
+
+        if (scan.status === 'ready') {
+          const scanRes = await fetchScanStatusById(id)
+
+          if (scanRes.success === false) {
             dispatch({
               type: 'SET_ERROR_MESSAGE',
               payload: {
@@ -47,20 +84,16 @@ const useScanTracking = ({
             return
           }
 
-          if (scanRes.data.status !== 'pending') {
-            clearInterval(intervalId)
+          const scan = transformScan(scanRes.data)
 
-            const scan = transformScan(scanRes.data)
-
-            dispatch({
-              type: UPDATE_SCAN_STATUS,
-              payload: scan
-            })
-          }
-        }, 2000) // Poll every 2 seconds
-
-        intervalIds.push(intervalId)
+          dispatch({
+            type: UPDATE_SCAN_STATUS,
+            payload: scan
+          })
+        }
       }
+
+      handleScan()
     })
 
     const timeoutId = setTimeout(() => {
@@ -69,7 +102,6 @@ const useScanTracking = ({
 
     return () => {
       clearTimeout(timeoutId)
-
       intervalIds.forEach((id) => clearInterval(id))
     }
   }, [state.scans])

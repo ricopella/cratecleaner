@@ -13,7 +13,6 @@ const useCrateSources = (): {
 
   useEffect(() => {
     listenForNewCrate(() => {
-      console.log('new crate')
       fetchData()
     })
   })

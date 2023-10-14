@@ -25,10 +25,9 @@ import {
   updateScanById
 } from '../../db/actions'
 import { ScanConfiguration } from '../../types'
-import { listCrateFiles } from '../serato'
 import { deleteFiles as deleteFilesUtil } from '../utils'
 import { getDuplicates } from './duplicates'
-import { getDuplicatesWithMetadata } from './utils'
+import { getCratesAndFiles, getDuplicatesWithMetadata } from './utils'
 
 export const registerQueryHandler = (): void => {
   ipcMain.handle(GET_CRATE_SRCS, async () => {
@@ -67,10 +66,10 @@ export const registerQueryHandler = (): void => {
     setImmediate(async () => {
       try {
         const scanResults = await Promise.all([
-          getDuplicates(configuration.directoryPaths),
-          listCrateFiles()
+          getDuplicates(configuration),
+          configuration.includeCrates ? getCratesAndFiles() : []
         ])
-        const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults)
+        const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults, configuration)
 
         await updateScanById(
           results.data.id,

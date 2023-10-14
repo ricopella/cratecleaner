@@ -1,7 +1,7 @@
 import { createHash } from 'crypto'
 import { createReadStream, promises as fs } from 'fs'
 import { basename, extname, resolve } from 'path'
-import { FileInfo } from '../../types'
+import { FileInfo, ScanConfiguration } from '../../types'
 
 const DUPLICATE_FILE_BLACK_LIST = [
   '.DS_Store',
@@ -19,7 +19,7 @@ async function* getFiles(dir: string): AsyncGenerator<string> {
   for (const dirent of dirents) {
     const res = resolve(dir, dirent.name)
     if (dirent.isDirectory()) {
-      yield* getFiles(res)
+      yield * getFiles(res)
     } else {
       if (!DUPLICATE_FILE_BLACK_LIST.includes(dirent.name)) {
         yield res
@@ -27,19 +27,26 @@ async function* getFiles(dir: string): AsyncGenerator<string> {
     }
   }
 }
-interface ProcessBatchOptions {
-  type?: 'content' | 'name'
-}
 
 async function processBatch(
   paths: string[],
-  options: ProcessBatchOptions = {}
+  options: ScanConfiguration
 ): Promise<{ hash: string; info: FileInfo }[]> {
-  const { type = 'name' } = options
+  const { matchType, type } = options
   const results: { hash: string; info: FileInfo }[] = []
 
   for (const path of paths) {
-    if (type === 'content') {
+    const fileType = extname(path).substring(1)
+
+    // only process files matching the type (audi or image)
+    if (
+      (type === 'audio' && !['mp3', 'wav', 'flac'].includes(fileType)) ||
+      (type === 'image' && !['jpg', 'jpeg', 'png'].includes(fileType))
+    ) {
+      continue
+    }
+
+    if (matchType === 'contents') {
       // Check by content
       const hash = createHash('md5')
       const stream = createReadStream(path)
@@ -87,17 +94,21 @@ async function processBatch(
  *
  * using a generator to process files in batches and streams to process files
  */
-export async function getDuplicates(directories: string[]): Promise<Map<string, FileInfo[]>> {
+export async function getDuplicates(
+  configuration: ScanConfiguration
+): Promise<Map<string, FileInfo[]>> {
   const hashMap: Map<string, FileInfo[]> = new Map()
 
-  for (const dir of directories) {
+  const { directoryPaths } = configuration
+
+  for (const dir of directoryPaths) {
     const filesGenerator = getFiles(dir)
 
     let batch: string[] = []
     for await (const file of filesGenerator) {
       batch.push(file)
       if (batch.length >= 5) {
-        const results = await processBatch(batch)
+        const results = await processBatch(batch, configuration)
         for (const { hash, info } of results) {
           const existing = hashMap.get(hash) || []
           hashMap.set(hash, [...existing, info])
@@ -107,7 +118,7 @@ export async function getDuplicates(directories: string[]): Promise<Map<string, 
     }
 
     if (batch.length > 0) {
-      const results = await processBatch(batch)
+      const results = await processBatch(batch, configuration)
       for (const { hash, info } of results) {
         const existing = hashMap.get(hash) || []
         hashMap.set(hash, [...existing, info])

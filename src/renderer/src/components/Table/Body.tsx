@@ -30,8 +30,8 @@ const TableBody = <T extends object>({
                 ))}
               </tr>
               {row.getIsExpanded() &&
-                row.subRows.map((subRow) => (
-                  <tr key={subRow.id} className={bgColorClass}>
+                row.subRows.map((subRow, subRowIndex) => (
+                  <tr key={`sub_${subRow.id}_${subRowIndex}`} className={bgColorClass}>
                     {subRow.getVisibleCells().map((cell) => (
                       <td key={cell.id} style={{ width: cell.column.getSize() }}>
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

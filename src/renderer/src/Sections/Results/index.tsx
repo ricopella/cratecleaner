@@ -4,8 +4,14 @@ import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbo
 import { useMain } from '@renderer/context/MainContext'
 import { TableProvider, useTableContext } from '@renderer/context/TableContext'
 import { DuplicateFile, ResultsData, ScanResults } from '@src/types'
-import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import {
+  SortingState,
+  createColumnHelper,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable
+} from '@tanstack/react-table'
+import { useMemo, useState } from 'react'
 import ArrowRight from '../../assets/arrow-right.svg?react'
 import Header from '../../components/Table/Header'
 import ActionsRow from './ActionsRow'
@@ -92,7 +98,6 @@ const columns = [
       }
 
       const row = info.row.original as unknown as DuplicateFile
-
       return row?.metadata?.title ?? ''
     },
     enableGrouping: false
@@ -173,7 +178,12 @@ const columns = [
     header: 'Crates',
     cell: (info) => {
       if (info.row.depth === 0) {
-        return ''
+        const count = info.row.subRows.reduce((acc, row) => {
+          // @ts-ignore
+          return acc + row.original?.crates?.length ?? 0
+        }, 0)
+
+        return count
       }
 
       const row = info.row.original as unknown as DuplicateFile
@@ -197,7 +207,7 @@ const Table = ({ id }: { id: string }): JSX.Element => {
   const { expanded, setExpanded, rowSelection, setRowSelection } = useTableContext()
   const scan = state.scans[id]
   const results: ScanResults = scan.results ?? { files: {} }
-
+  const [sorted, setSorting] = useState<SortingState>([])
   const data: ResultsData[] = useMemo(() => {
     return transformScanResultsToRows(results, scan)
   }, [results, scan])
@@ -207,26 +217,26 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
+    enableSorting: true,
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
+    getSortedRowModel: getSortedRowModel(),
     getSubRows: (row) => {
       return row.files.map((file, fileIndex) => ({
         id: `${row.id}-${fileIndex}`,
         name: file.name,
         path: file.path,
         type: file.type,
-        artist: file.metadata?.artist ?? '',
-        album: file.metadata?.album ?? '',
-        title: file.metadata?.title ?? '',
-        bpm: file.metadata?.bpm ?? '',
-        genre: file.metadata?.genre?.[0] ?? '',
+        metadata: file.metadata,
         files: [],
         crates: file.crates
       }))
     },
+    onSortingChange: setSorting,
     state: {
       expanded,
-      rowSelection: rowSelection
+      rowSelection: rowSelection,
+      sorting: sorted
     },
     debugTable: true,
     columnResizeMode: 'onChange'
