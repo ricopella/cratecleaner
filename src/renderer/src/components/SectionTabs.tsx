@@ -2,7 +2,7 @@ import Directories from '@renderer/Sections/Directories'
 import { useMain } from '@renderer/context/MainContext'
 import { REMOVE_SCAN, UPDATE_ACTIVE_TAB } from '@src/constants'
 import { keys } from 'ramda'
-import { Suspense, lazy, memo, useMemo, useState } from 'react'
+import { Suspense, lazy, memo, useMemo } from 'react'
 import Loader from './Loader'
 
 const LazyResults = lazy(() => import('@renderer/Sections/Results'))
@@ -17,7 +17,6 @@ const classNames = {
 
 function SectionTabs(): JSX.Element {
   const { state, dispatch } = useMain()
-  const [settingsIsShown, setSettingsIsShown] = useState<boolean>(false)
 
   const handleTabClick = (tabId: string): void => {
     dispatch({

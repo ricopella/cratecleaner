@@ -1,4 +1,4 @@
-import { getCrateSrcs } from '@src/db/actions'
+import { getCrateSrcs } from '../../db/actions'
 import { CrateFile, FileInfo, FileWithMetadata, ScanConfiguration } from '../../types'
 import { listCrateFiles } from '../serato'
 import { processBatch } from './audioMetadata'
