@@ -1,13 +1,18 @@
+import DebouncedInput from '@renderer/components/DebouncedInput'
 import Loader from '@renderer/components/Loader'
 import Body from '@renderer/components/Table/Body'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
 import { TableProvider, useTableContext } from '@renderer/context/TableContext'
 import { DuplicateFile, ResultsData, ScanResults } from '@src/types'
+import { RankingInfo } from '@tanstack/match-sorter-utils'
 import {
+  ColumnFiltersState,
+  FilterFn,
   SortingState,
   createColumnHelper,
   getCoreRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table'
@@ -17,7 +22,16 @@ import Header from '../../components/Table/Header'
 import ActionsRow from './ActionsRow'
 import ConfigurationPanel from './ConfigurationPanel'
 import DeleteConfirmModal from './DeleteConfirmModal'
-import { transformScanResultsToRows } from './utils'
+import { fuzzyFilter, transformScanResultsToRows } from './utils'
+
+declare module '@tanstack/table-core' {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>
+  }
+  interface FilterMeta {
+    itemRank: RankingInfo
+  }
+}
 
 const classNames = {
   container: 'h-full w-full grid grid-rows-max-1fr-max gap-2',
@@ -211,16 +225,25 @@ const Table = ({ id }: { id: string }): JSX.Element => {
   const data: ResultsData[] = useMemo(() => {
     return transformScanResultsToRows(results, scan)
   }, [results, scan])
+  const [globalFilter, setGlobalFilter] = useState('')
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const table = useReactTable<ResultsData>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     enableRowSelection: true,
-    enableSorting: true,
+    enableSorting: false,
+    filterFns: {
+      fuzzy: fuzzyFilter
+    },
     onExpandedChange: setExpanded,
     onRowSelectionChange: setRowSelection,
     getSortedRowModel: getSortedRowModel(),
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: fuzzyFilter,
+    getFilteredRowModel: getFilteredRowModel(),
     getSubRows: (row) => {
       return row.files.map((file, fileIndex) => ({
         id: `${row.id}-${fileIndex}`,
@@ -236,7 +259,9 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     state: {
       expanded,
       rowSelection: rowSelection,
-      sorting: sorted
+      sorting: sorted,
+      globalFilter,
+      columnFilters
     },
     debugTable: true,
     columnResizeMode: 'onChange'
@@ -261,6 +286,11 @@ const Table = ({ id }: { id: string }): JSX.Element => {
 
     return (
       <>
+        <DebouncedInput
+          value={globalFilter ?? ''}
+          onChange={(value): void => setGlobalFilter(String(value))}
+          placeholder="Search by name..."
+        />
         <table className={classNames.table}>
           <Header<ResultsData> headerGroups={table.getHeaderGroups()} />
           <Body table={table} noResultsMessage="No duplicate files found in this scan." />

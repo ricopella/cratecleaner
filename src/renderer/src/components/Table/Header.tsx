@@ -19,12 +19,16 @@ const TableHeader = <T extends object>({ headerGroups }: TableHeaderProps<T>): J
               style={{
                 width: header.getSize()
               }}
-              onClick={(): ((event: unknown) => void) | undefined =>
-                header.column.getToggleSortingHandler()
-              }
+              onClick={header.column.getToggleSortingHandler}
             >
               {header.isPlaceholder ? null : (
-                <div>{flexRender(header.column.columnDef.header, header.getContext())}</div>
+                <div>
+                  {flexRender(header.column.columnDef.header, header.getContext())}{' '}
+                  {{
+                    asc: ' 🔼',
+                    desc: ' 🔽'
+                  }[header.column.getIsSorted() as string] ?? null}
+                </div>
               )}
             </th>
           ))}

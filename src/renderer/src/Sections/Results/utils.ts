@@ -1,4 +1,6 @@
 import { ExtendedScan, ResultsData, ScanResults } from '@src/types'
+import { rankItem } from '@tanstack/match-sorter-utils'
+import { FilterFn } from '@tanstack/react-table'
 import { comparator, flatten, keys, map, sort } from 'ramda'
 
 export const transformScanResultsToRows = (
@@ -19,4 +21,17 @@ export const transformScanResultsToRows = (
   )
 
   return sortedResults
+}
+
+export const fuzzyFilter: FilterFn<ResultsData> = (row, columnId, value, addMeta) => {
+  // Rank the item
+  const itemRank = rankItem(row.getValue(columnId), value)
+
+  // Store the itemRank info
+  addMeta({
+    itemRank
+  })
+
+  // Return if the item should be filtered in/out
+  return itemRank.passed
 }
