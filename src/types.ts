@@ -56,7 +56,8 @@ const duplicateFile = z.object({
 export type DuplicateFile = z.infer<typeof duplicateFile>
 
 const resultsSchema = z.object({
-  files: z.record(z.string(), z.array(duplicateFile))
+  files: z.record(z.string(), z.array(duplicateFile)),
+  errors: z.array(z.string()).optional()
 })
 
 export const ScanResultsSchema = z.union([resultsSchema, z.null()])

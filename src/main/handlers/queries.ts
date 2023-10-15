@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron'
+import { concat } from 'ramda'
 import {
   ADD_NEW_SCAN,
   DELETE_CRATE_SRC,
@@ -9,7 +10,8 @@ import {
   GET_FILES_DIRECTORIES,
   GET_SCANS_LIST,
   GET_SCAN_BY_ID,
-  REMOVE_DIRECTORIES
+  REMOVE_DIRECTORIES,
+  SCAN_PROGRESS
 } from '../../constants'
 import {
   createScan,
@@ -67,15 +69,18 @@ export const registerQueryHandler = (): void => {
       try {
         const scanResults = await Promise.all([
           getDuplicates(configuration),
-          configuration.includeCrates ? getCratesAndFiles() : []
+          configuration.includeCrates ? getCratesAndFiles() : { crates: [], errorMessages: [] }
         ])
+
         const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults, configuration)
+        ipcMain.emit(SCAN_PROGRESS, { progress: 100 })
 
         await updateScanById(
           results.data.id,
           'completed',
           JSON.stringify({
-            files: resultsWithMetadata.size > 0 ? Object.fromEntries(resultsWithMetadata) : {}
+            files: resultsWithMetadata.size > 0 ? Object.fromEntries(resultsWithMetadata) : {},
+            errors: concat(scanResults[0].errors, scanResults[1].errorMessages)
           })
         )
       } catch (error) {

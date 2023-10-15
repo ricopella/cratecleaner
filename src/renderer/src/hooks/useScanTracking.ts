@@ -58,6 +58,15 @@ const useScanTracking = ({
                 type: UPDATE_SCAN_STATUS,
                 payload: scan
               })
+
+              if ((scan.results?.errors || []).length > 0) {
+                dispatch({
+                  type: 'SET_ERROR_MESSAGE',
+                  payload: {
+                    error: scan?.results?.errors?.join(', ') ?? ''
+                  }
+                })
+              }
             }
 
             // Update the interval
