@@ -15,7 +15,7 @@ import {
 } from '@src/constants'
 
 import { DeletedFilesSchema } from '@src/types'
-import { assocPath, concat, curry, dissoc, uniq, uniqBy } from 'ramda'
+import { assocPath, concat, curry, dissoc, evolve, uniq, uniqBy } from 'ramda'
 import { AllScan, MainActions, MainState } from './types'
 
 export const initialState: MainState = {
@@ -66,8 +66,13 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
         }
       }
     }
-    case UPDATE_ACTIVE_TAB:
-      return assocPath(['activeTab'], action.payload.activeTab, state)
+    case UPDATE_ACTIVE_TAB: {
+      const transformations = {
+        activeTab: () => action.payload.activeTab,
+        error: () => null
+      }
+      return evolve(transformations, state)
+    }
     case REMOVE_SCAN:
       return assocPath(['scans'], dissoc(action.payload.id, state.scans), state)
     case ADD_TRACKING_DELETE_ID:

@@ -1,4 +1,5 @@
 import { Table, flexRender } from '@tanstack/react-table'
+import React from 'react'
 
 interface TableBodyProps<T extends object> {
   table: Table<T>
@@ -12,7 +13,7 @@ const TableBody = <T extends object>({
   return (
     <tbody>
       {table.getRowModel().rows.length === 0 ? (
-        <tr>
+        <tr key="no_rows">
           <td colSpan={table.getVisibleFlatColumns().length}>{noResultsMessage}</td>
         </tr>
       ) : (
@@ -21,10 +22,14 @@ const TableBody = <T extends object>({
           const bgColorClass = isEvenRow ? 'bg-base-300' : 'bg-base-100'
 
           return (
-            <>
+            <React.Fragment key={`wrapper_${row.id}_${i}`}>
               <tr key={`${row.id}_${i}`} className={bgColorClass}>
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} style={{ width: cell.column.getSize() }}>
+                  <td
+                    key={cell.id}
+                    className="text-base-content"
+                    style={{ width: cell.column.getSize() }}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -33,13 +38,17 @@ const TableBody = <T extends object>({
                 row.subRows.map((subRow, subRowIndex) => (
                   <tr key={`sub_${subRow.id}_${subRowIndex}`} className={bgColorClass}>
                     {subRow.getVisibleCells().map((cell) => (
-                      <td key={cell.id} style={{ width: cell.column.getSize() }}>
+                      <td
+                        key={cell.id}
+                        className="text-base-content"
+                        style={{ width: cell.column.getSize() }}
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}
                   </tr>
                 ))}
-            </>
+            </React.Fragment>
           )
         })
       )}

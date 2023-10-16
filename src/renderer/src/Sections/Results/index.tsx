@@ -22,7 +22,7 @@ import Header from '../../components/Table/Header'
 import ActionsRow from './ActionsRow'
 import ConfigurationPanel from './ConfigurationPanel'
 import DeleteConfirmModal from './DeleteConfirmModal'
-import { fuzzyFilter, transformScanResultsToRows } from './utils'
+import { fuzzyFilter, getCommonValue, transformScanResultsToRows } from './utils'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -108,7 +108,7 @@ const columns = [
     header: 'Title',
     cell: (info) => {
       if (info.row.depth === 0) {
-        return ''
+        return getCommonValue(info.row.subRows, 'title')
       }
 
       const row = info.row.original as unknown as DuplicateFile
@@ -121,7 +121,7 @@ const columns = [
     header: 'Artist',
     cell: (info) => {
       if (info.row.depth === 0) {
-        return ''
+        return getCommonValue(info.row.subRows, 'artist')
       }
 
       const row = info.row.original as unknown as DuplicateFile
@@ -130,26 +130,26 @@ const columns = [
     },
     enableGrouping: false
   }),
-  columnHelper.display({
-    id: 'album',
-    header: 'Album',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return ''
-      }
+    columnHelper.display({
+      id: 'album',
+      header: 'Album',
+      cell: (info) => {
+        if (info.row.depth === 0) {
+          return getCommonValue(info.row.subRows, 'artist')
+        }
 
-      const row = info.row.original as unknown as DuplicateFile
+        const row = info.row.original as unknown as DuplicateFile
 
-      return row?.metadata?.album ?? ''
-    },
-    enableGrouping: false
-  }),
+        return row?.metadata?.album ?? ''
+      },
+      enableGrouping: false
+    }),
   columnHelper.display({
     id: 'genre',
     header: 'Genre',
     cell: (info) => {
       if (info.row.depth === 0) {
-        return ''
+        return getCommonValue(info.row.subRows, 'genre')
       }
 
       const row = info.row.original as unknown as DuplicateFile
@@ -158,26 +158,26 @@ const columns = [
     },
     enableGrouping: false
   }),
-  columnHelper.display({
-    id: 'bpm',
-    header: 'BPM',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return ''
-      }
+    columnHelper.display({
+      id: 'bpm',
+      header: 'BPM',
+      cell: (info) => {
+        if (info.row.depth === 0) {
+          return getCommonValue(info.row.subRows, 'bpm')
+        }
 
-      const row = info.row.original as unknown as DuplicateFile
+        const row = info.row.original as unknown as DuplicateFile
 
-      return row?.metadata?.bpm ?? ''
-    },
-    enableGrouping: false
-  }),
+        return row?.metadata?.bpm ?? ''
+      },
+      enableGrouping: false
+    }),
   columnHelper.display({
     id: 'type',
     header: 'Type',
     cell: (info) => {
       if (info.row.depth === 0) {
-        return ''
+        return getCommonValue(info.row.subRows, 'type')
       }
 
       const row = info.row.original as unknown as DuplicateFile
@@ -187,6 +187,7 @@ const columns = [
     enableGrouping: false,
     size: 32
   }),
+
   columnHelper.display({
     id: 'crates',
     header: 'Crates',
@@ -202,7 +203,17 @@ const columns = [
 
       const row = info.row.original as unknown as DuplicateFile
 
-      return row?.crates.join(', ') ?? ''
+      const crateCount = row.crates.length
+
+      if (crateCount === 0) {
+        return ''
+      }
+
+      return (
+        <div className="tooltip" data-tip={row.crates.join(', ')}>
+          <div className="badge badge-neutral">{crateCount}</div>
+        </div>
+      )
     },
     enableGrouping: false,
     size: 32
@@ -229,21 +240,21 @@ const Table = ({ id }: { id: string }): JSX.Element => {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const table = useReactTable<ResultsData>({
-    data,
+    columnResizeMode: 'onChange',
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    data,
+    debugTable: true,
     enableRowSelection: true,
     enableSorting: false,
-    filterFns: {
-      fuzzy: fuzzyFilter
-    },
-    onExpandedChange: setExpanded,
-    onRowSelectionChange: setRowSelection,
-    getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: fuzzyFilter,
+    getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    globalFilterFn: fuzzyFilter,
+    onColumnFiltersChange: setColumnFilters,
+    onExpandedChange: setExpanded,
+    onGlobalFilterChange: setGlobalFilter,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
     getSubRows: (row) => {
       return row.files.map((file, fileIndex) => ({
         id: `${row.id}-${fileIndex}`,
@@ -255,16 +266,19 @@ const Table = ({ id }: { id: string }): JSX.Element => {
         crates: file.crates
       }))
     },
-    onSortingChange: setSorting,
+    filterFns: {
+      fuzzy: fuzzyFilter
+    },
     state: {
+      columnVisibility: {
+        crates: scan.configuration.includeCrates
+      },
       expanded,
       rowSelection: rowSelection,
       sorting: sorted,
       globalFilter,
       columnFilters
-    },
-    debugTable: true,
-    columnResizeMode: 'onChange'
+    }
   })
 
   const selectedCount = useMemo(() => {

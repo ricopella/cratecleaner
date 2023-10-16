@@ -28,7 +28,7 @@ export default memo(function DebouncedInput({
     <input
       {...props}
       value={value}
-      className="input input-bordered w-full max-w-xs input-sm mb-2"
+      className="input input-bordered w-full max-w-xs input-sm mb-2 input-ghost"
       onChange={(e): void => setValue(e.target.value)}
     />
   )

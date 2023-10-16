@@ -19,7 +19,8 @@ module.exports = {
         'max-1fr-max': 'max-content 1fr max-content',
         'max-1fr': 'max-content 1fr',
         '1fr-max': '1fr max-content',
-        'max-max': 'max-content max-content'
+        'max-max': 'max-content max-content',
+        'max-max-max': 'repeat(3, max-content)'
       }
     }
   },
