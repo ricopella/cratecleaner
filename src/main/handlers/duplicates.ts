@@ -1,4 +1,4 @@
-import { SCAN_PROGRESS } from '@src/constants'
+import { SCAN_PROGRESS } from '../../constants'
 import { createHash } from 'crypto'
 import { ipcMain } from 'electron'
 import { createReadStream, promises as fs } from 'fs'

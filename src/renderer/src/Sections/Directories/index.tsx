@@ -10,6 +10,7 @@ import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/re
 import { memo, useEffect, useMemo } from 'react'
 import ActionsRow from './ActionsRow'
 import ConfigurationPanel from './ConfigurationPanel'
+import { fuzzyFilter } from '../Results/utils'
 
 const classNames = {
   container: 'h-full w-full grid grid-rows-max-1fr-max',
@@ -77,6 +78,9 @@ const List = (): JSX.Element => {
         id: false
       },
       rowSelection
+    },
+    filterFns: {
+      fuzzy: fuzzyFilter
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection
