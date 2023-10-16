@@ -6,14 +6,30 @@ interface TableHeaderProps<D extends object> {
 
 const TableHeader = <T extends object>({ headerGroups }: TableHeaderProps<T>): JSX.Element => {
   return (
-    <thead>
+    <thead className="sticky top-0 bg-base-200">
       {headerGroups.map((headerGroup) => (
         <tr key={headerGroup.id}>
           {headerGroup.headers.map((header) => (
-            <th key={header.id}>
-              {header.isPlaceholder
-                ? null
-                : flexRender(header.column.columnDef.header, header.getContext())}
+            <th
+              key={header.id}
+              colSpan={header.colSpan}
+              className={`relative group ${
+                header.column.getCanSort() ? 'cursor-pointer select-none' : ''
+              }`}
+              style={{
+                width: header.getSize()
+              }}
+              onClick={header.column.getToggleSortingHandler}
+            >
+              {header.isPlaceholder ? null : (
+                <div>
+                  {flexRender(header.column.columnDef.header, header.getContext())}{' '}
+                  {{
+                    asc: ' 🔼',
+                    desc: ' 🔽'
+                  }[header.column.getIsSorted() as string] ?? null}
+                </div>
+              )}
             </th>
           ))}
         </tr>

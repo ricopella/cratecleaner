@@ -1,4 +1,5 @@
 import { Scan } from '@prisma/client'
+import { ExpandedState, VisibilityState } from '@tanstack/react-table'
 import { z } from 'zod'
 import { Metadata } from './main/handlers/audioMetadata'
 
@@ -7,10 +8,14 @@ export type DatabaseOperationResult<T> =
   | { success: false; error: string }
 
 export interface TableContextProps {
+  expanded: ExpandedState
+  columnVisibility: VisibilityState
+  setColumnVisibility: React.Dispatch<React.SetStateAction<VisibilityState>>
+  filter: string
   rowSelection: Record<string, boolean>
+  setExpanded: React.Dispatch<React.SetStateAction<ExpandedState>>
+  setFilter: React.Dispatch<React.SetStateAction<string>>
   setRowSelection: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
-  error: string | null
-  setError: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 export type FileInfo = {
@@ -27,32 +32,36 @@ export type FileWithMetadata = FileInfo & {
 export type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export const ScanConfigurationSchema = z.object({
-  directoryPaths: z.array(z.string())
+  directoryPaths: z.array(z.string()),
+  type: z.enum(['audio', 'image']),
+  includeCrates: z.boolean(),
+  matchType: z.enum(['contents', 'name', 'size'])
 })
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>
 
 const fileMetadata = z.object({
-  album: z.string().optional(),
-  artist: z.string().optional(),
-  genre: z.array(z.string()).optional(),
-  title: z.string().optional(),
-  comment: z.array(z.string()).optional(),
-  bpm: z.number().optional()
+  album: z.string().nullish(),
+  artist: z.string().nullish(),
+  genre: z.array(z.string()).nullish(),
+  title: z.string().nullish(),
+  comment: z.array(z.string()).nullish(),
+  bpm: z.number().nullish()
 })
 
 const duplicateFile = z.object({
   name: z.string(),
   path: z.string(),
   type: z.string(),
-  metadata: fileMetadata.nullable().optional(),
+  metadata: fileMetadata.nullish(),
   crates: z.array(z.string())
 })
 
 export type DuplicateFile = z.infer<typeof duplicateFile>
 
 const resultsSchema = z.object({
-  files: z.record(z.string(), z.array(duplicateFile))
+  files: z.record(z.string(), z.array(duplicateFile)),
+  errors: z.array(z.string()).optional()
 })
 
 export const ScanResultsSchema = z.union([resultsSchema, z.null()])

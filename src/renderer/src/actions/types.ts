@@ -1,7 +1,8 @@
-import { CrateSrc, FilesDirectory } from '@prisma/client'
+import { CrateSrc, FilesDirectory, Scan } from '@prisma/client'
 import {
   ADD_DELETED_FILES_RESULT,
   ADD_NEW_SCAN,
+  ADD_SCAN_TO_ALL_SCANS,
   ADD_TRACKING_DELETE_ID,
   CREATE_CRATE_SRC,
   GET_CRATE_SRCS,
@@ -9,16 +10,25 @@ import {
   NEW_FILES_DIRECTORY,
   REMOVE_DIRECTORIES,
   REMOVE_SCAN,
+  SET_ERROR_MESSAGE,
+  SET_SCANS_LIST,
   UPDATE_ACTIVE_TAB,
   UPDATE_SCAN_STATUS
 } from '@src/constants'
 import { DeletedFilesSchema, ExtendedScan } from '@src/types'
 
 export type MainState = {
+  activeTab: string // DIRECTORIES or uuid if result
   crateSrcs: CrateSrc[]
   directorySrcs: FilesDirectory[]
+  error: string | null
   scans: Record<string, ExtendedScan>
-  activeTab: string // DIRECTORIES or uuid if result
+  allScans: Pick<Scan, 'id' | 'createdAt' | 'status'>[]
+  scanConfiguration: {
+    type: 'audio' | 'image'
+    includeCrates: boolean
+    matchType: 'contents' | 'name' | 'size'
+  }
 }
 
 export interface CreateCrateSrcAction {
@@ -99,6 +109,50 @@ interface AddDeletedFilesResult {
   }
 }
 
+interface SetErrorMessage {
+  type: typeof SET_ERROR_MESSAGE
+  payload: {
+    error: string | null
+  }
+}
+
+interface SetScans {
+  type: typeof SET_SCANS_LIST
+  payload: {
+    scans: MainState['allScans']
+  }
+}
+
+export type AllScan = Pick<Scan, 'id' | 'createdAt' | 'status'>
+
+interface AddScanToAllScans {
+  type: typeof ADD_SCAN_TO_ALL_SCANS
+  payload: {
+    scan: AllScan
+  }
+}
+
+interface UpdateScanConfigurationType {
+  type: 'UPDATE_SCAN_CONFIGURATION_TYPE'
+  payload: {
+    type: 'audio' | 'image'
+  }
+}
+
+interface UpdateScanConfigurationIncludeCrates {
+  type: 'UPDATE_SCAN_CONFIGURATION_INCLUDE_CRATES'
+  payload: {
+    includeCrates: boolean
+  }
+}
+
+interface UpdateScanConfigurationMatchType {
+  type: 'UPDATE_SCAN_CONFIGURATION_MATCH_TYPE'
+  payload: {
+    matchType: 'contents' | 'name' | 'size'
+  }
+}
+
 export type MainActions =
   | CreateCrateSrcAction
   | GetCrateSrcs
@@ -111,6 +165,12 @@ export type MainActions =
   | RemoveScan
   | AddTrackingDeleteId
   | AddDeletedFilesResult
+  | SetErrorMessage
+  | SetScans
+  | AddScanToAllScans
+  | UpdateScanConfigurationType
+  | UpdateScanConfigurationIncludeCrates
+  | UpdateScanConfigurationMatchType
 
 export interface MainContextProps {
   state: MainState

@@ -4,13 +4,13 @@ import { extname } from 'node:path'
 import { pick } from 'ramda'
 
 export type Metadata = {
-  title: string
-  artist: string
-  genre: string[]
-  album: string
-  bpm: number
-  path: string
-  comment: string[]
+  title?: string
+  artist?: string
+  genre?: string[]
+  album?: string
+  bpm?: number
+  path?: string
+  comment?: string[]
 }
 
 async function getAudioMimeType(path: string): Promise<string | null> {
@@ -36,7 +36,6 @@ export async function processBatch(paths: string[]): Promise<Metadata[]> {
       const mimeType = await getAudioMimeType(path)
       if (!mimeType) {
         console.error(`Could not get mime type for file: ${path}`)
-        // TODO: how to handle non-audio files?
         continue
       }
       const metadata = await parseBuffer(buffer, { mimeType })
@@ -50,7 +49,7 @@ export async function processBatch(paths: string[]): Promise<Metadata[]> {
 
       const selectedProperties = pickProperties(common)
 
-      results.push(selectedProperties)
+      results.push({ ...selectedProperties, path })
     } catch (error) {
       console.error(
         `Error parsing metadata for file: ${path}`,

@@ -11,6 +11,11 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+extraResources:
+  - "prisma/**/*"
+  - "node_modules/.prisma/**/*"
+  - "node_modules/@prisma/client/**/*"
+  - '.env'
 win:
   executableName: cc
 nsis:

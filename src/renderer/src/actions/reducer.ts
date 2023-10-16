@@ -1,25 +1,35 @@
 import {
   ADD_DELETED_FILES_RESULT,
   ADD_NEW_SCAN,
+  ADD_SCAN_TO_ALL_SCANS,
   ADD_TRACKING_DELETE_ID,
   GET_CRATE_SRCS,
   GET_FILES_DIRECTORIES,
   NEW_FILES_DIRECTORY,
   REMOVE_DIRECTORIES,
   REMOVE_SCAN,
+  SET_ERROR_MESSAGE,
+  SET_SCANS_LIST,
   UPDATE_ACTIVE_TAB,
   UPDATE_SCAN_STATUS
 } from '@src/constants'
 
 import { DeletedFilesSchema } from '@src/types'
-import { assocPath, concat, curry, dissoc, uniq, uniqBy } from 'ramda'
-import { MainActions, MainState } from './types'
+import { assocPath, concat, curry, dissoc, evolve, uniq, uniqBy } from 'ramda'
+import { AllScan, MainActions, MainState } from './types'
 
 export const initialState: MainState = {
   activeTab: 'DIRECTORIES',
+  allScans: [],
   crateSrcs: [],
   directorySrcs: [],
-  scans: {}
+  error: null,
+  scans: {},
+  scanConfiguration: {
+    type: 'audio',
+    includeCrates: true,
+    matchType: 'name'
+  }
 }
 
 export function directoryReducer(state: MainState, action: MainActions): MainState {
@@ -34,6 +44,8 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
         uniq(concat(state.directorySrcs, [action.payload.directorySrc])),
         state
       )
+    case SET_ERROR_MESSAGE:
+      return assocPath(['error'], action.payload.error, state)
     case REMOVE_DIRECTORIES:
       return assocPath(
         ['directorySrcs'],
@@ -54,8 +66,13 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
         }
       }
     }
-    case UPDATE_ACTIVE_TAB:
-      return assocPath(['activeTab'], action.payload.activeTab, state)
+    case UPDATE_ACTIVE_TAB: {
+      const transformations = {
+        activeTab: () => action.payload.activeTab,
+        error: () => null
+      }
+      return evolve(transformations, state)
+    }
     case REMOVE_SCAN:
       return assocPath(['scans'], dissoc(action.payload.id, state.scans), state)
     case ADD_TRACKING_DELETE_ID:
@@ -80,6 +97,20 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
       )
       return updatedState
     }
+    case SET_SCANS_LIST:
+      return assocPath(['allScans'], action.payload.scans, state)
+    case ADD_SCAN_TO_ALL_SCANS:
+      return assocPath(
+        ['allScans'],
+        uniqBy((s: AllScan) => s.id, concat(state.allScans, [action.payload.scan])),
+        state
+      )
+    case 'UPDATE_SCAN_CONFIGURATION_TYPE':
+      return assocPath(['scanConfiguration', 'type'], action.payload.type, state)
+    case 'UPDATE_SCAN_CONFIGURATION_MATCH_TYPE':
+      return assocPath(['scanConfiguration', 'matchType'], action.payload.matchType, state)
+    case 'UPDATE_SCAN_CONFIGURATION_INCLUDE_CRATES':
+      return assocPath(['scanConfiguration', 'includeCrates'], action.payload.includeCrates, state)
     default:
       return state
   }

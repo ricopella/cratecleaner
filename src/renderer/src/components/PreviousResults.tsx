@@ -2,17 +2,19 @@ import { useMain } from '@renderer/context/MainContext'
 import useScansList from '@renderer/hooks/useScansList'
 import { UPDATE_ACTIVE_TAB } from '@src/constants'
 import { format } from 'date-fns'
+import { useMemo } from 'react'
 
 const classNames = {
   dropdown: 'dropdown dropdown-top',
   btn: 'btn btn-sm',
-  ul: 'dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52'
+  ul: 'dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52  max-h-80 flex-nowrap overflow-y-auto'
 }
 
 export default function PreviousResults(): JSX.Element {
   // fetch previous results
-  const { list } = useScansList()
-  const { dispatch } = useMain()
+  useScansList()
+  const { state, dispatch } = useMain()
+  const list = useMemo(() => state.allScans, [state.allScans])
 
   return (
     <div className={classNames.dropdown}>
@@ -33,11 +35,16 @@ export default function PreviousResults(): JSX.Element {
                   id: scan.id,
                   scan: {
                     ...scan,
-                    status: 'pending', // to have polling query for finished scan TODO: consider changing logic
+                    status: 'ready',
                     createdAt: new Date(),
                     updatedAt: new Date(),
                     results: { files: {} },
-                    configuration: { directoryPaths: [] },
+                    configuration: {
+                      directoryPaths: [],
+                      type: 'audio',
+                      matchType: 'name',
+                      includeCrates: false
+                    },
                     deletedFiles: []
                   }
                 }

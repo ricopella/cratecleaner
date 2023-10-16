@@ -1,7 +1,6 @@
 import { FilesDirectory } from '@prisma/client'
 import Loader from '@renderer/components/Loader'
 import Body from '@renderer/components/Table/Body'
-import TableFooter from '@renderer/components/Table/Footer'
 import TableHeader from '@renderer/components/Table/Header'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
@@ -10,10 +9,12 @@ import useFetchDirectories from '@renderer/hooks/useDirectoriesList'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { memo, useEffect, useMemo } from 'react'
 import ActionsRow from './ActionsRow'
+import ConfigurationPanel from './ConfigurationPanel'
+import { fuzzyFilter } from '../Results/utils'
 
 const classNames = {
   container: 'h-full w-full grid grid-rows-max-1fr-max',
-  table: 'table table-xs'
+  table: 'table table-xs padding-sm w-full'
 }
 const columnHelper = createColumnHelper<FilesDirectory>()
 
@@ -44,7 +45,7 @@ const List = (): JSX.Element => {
           />
         ),
         cell: ({ row }) => (
-          <div className="pl-8">
+          <div>
             <IndeterminateCheckbox
               {...{
                 checked: row.getIsSelected(),
@@ -78,6 +79,9 @@ const List = (): JSX.Element => {
       },
       rowSelection
     },
+    filterFns: {
+      fuzzy: fuzzyFilter
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection
   })
@@ -94,8 +98,10 @@ const List = (): JSX.Element => {
     return (
       <table className={classNames.table}>
         <TableHeader<FilesDirectory> headerGroups={table.getHeaderGroups()} />
-        <Body<FilesDirectory> rows={table.getRowModel().rows} />
-        <TableFooter<FilesDirectory> footerGroups={table.getFooterGroups()} />
+        <Body<FilesDirectory>
+          table={table}
+          noResultsMessage="No directories selected. Use the buttons below to add/remove directories to scan."
+        />
       </table>
     )
   }
@@ -103,16 +109,12 @@ const List = (): JSX.Element => {
   return <div className="overflow-x-auto">{renderList()}</div>
 }
 
-const MemoizedList = memo(List)
-
 export default memo(function Directories(): JSX.Element {
   return (
     <TableProvider>
       <div className={classNames.container}>
-        <div>
-          <span className="text-md text-info">Configuration</span>
-        </div>
-        <MemoizedList />
+        <ConfigurationPanel />
+        <List />
         <ActionsRow />
       </div>
     </TableProvider>

@@ -15,7 +15,7 @@ const classNames = {
 
 export default function ActionsRow(): JSX.Element {
   const { state, dispatch } = useMain()
-  const { error, rowSelection, setError, setRowSelection } = useTableContext()
+  const { rowSelection, setRowSelection } = useTableContext()
 
   const handleRemoveDirectories = async (): Promise<void> => {
     const rowsToDelete = keys(rowSelection)
@@ -29,7 +29,12 @@ export default function ActionsRow(): JSX.Element {
     const res = await removeDirectories(deleteKeys)
 
     if (res.success === false) {
-      setError(res.error)
+      dispatch({
+        type: 'SET_ERROR_MESSAGE',
+        payload: {
+          error: res.error
+        }
+      })
       return
     }
 
@@ -44,12 +49,19 @@ export default function ActionsRow(): JSX.Element {
   }
 
   const handleNewScan = async (): Promise<void> => {
-    // insert new scan
     const res = await insertScan({
-      directoryPaths: state.directorySrcs.map((directory) => directory.path)
+      directoryPaths: state.directorySrcs.map((directory) => directory.path),
+      includeCrates: state.scanConfiguration.includeCrates,
+      matchType: state.scanConfiguration.matchType,
+      type: state.scanConfiguration.type
     })
     if (res.success === false) {
-      setError(res.error)
+      dispatch({
+        type: 'SET_ERROR_MESSAGE',
+        payload: {
+          error: res.error
+        }
+      })
       return
     }
 
@@ -61,6 +73,13 @@ export default function ActionsRow(): JSX.Element {
       type: ADD_NEW_SCAN,
       payload: {
         id: res.data.id,
+        scan
+      }
+    })
+
+    dispatch({
+      type: 'ADD_SCAN_TO_ALL_SCANS',
+      payload: {
         scan
       }
     })
@@ -86,7 +105,7 @@ export default function ActionsRow(): JSX.Element {
         -
       </button>
       <div className={classNames.errorContainer}>
-        <ErrorMessage error={error} />
+        <ErrorMessage error={state.error} />
       </div>
       <PreviousResults />
       <button

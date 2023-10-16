@@ -1,10 +1,12 @@
 import { CrateSrc, DeletedFiles, FilesDirectory, Scan } from '@prisma/client'
 import {
   ADD_NEW_SCAN,
+  DELETE_CRATE_SRC,
   DELETE_FILES,
   DIALOG_CRATE_SRC,
   DIALOG_FILES_DIRECTORY,
   GET_CRATE_SRCS,
+  GET_DELETED_FILES_COUNT,
   GET_DELETE_FILES_BY_ID,
   GET_DUPLICATES,
   GET_FILES_DIRECTORIES,
@@ -27,7 +29,7 @@ export const openFilesDirectoryDialog = (): void => {
 
 export type CallBack<T> = (arg: T) => void
 
-export const listenForSelectDirectory = (callback: CallBack<string>): void => {
+export const listenForNewCrate = (callback: CallBack<string>): void => {
   ipcRenderer.on(NEW_CRATE_SRC, (_: unknown, path: string) => {
     callback(path)
   })
@@ -122,4 +124,12 @@ export const getDeletedFilesById = (
   id: string
 ): Promise<DatabaseOperationResult<DeletedFiles | null>> => {
   return invokeIPC<DeletedFiles | null, string>(GET_DELETE_FILES_BY_ID, id)
+}
+
+export const getDeletedFilesCount = (): Promise<DatabaseOperationResult<number>> => {
+  return invokeIPC<number>(GET_DELETED_FILES_COUNT)
+}
+
+export const removeCrateSource = (id: string): Promise<DatabaseOperationResult<void>> => {
+  return invokeIPC<void, string>(DELETE_CRATE_SRC, id)
 }
