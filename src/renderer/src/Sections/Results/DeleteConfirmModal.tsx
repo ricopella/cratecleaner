@@ -43,10 +43,17 @@ export default memo(function deleteWarningModal({
     await deleteFiles(filesToDelete, id, deleteId)
 
     reset()
+
+    // close modal
+    const modal = document.getElementById('delete-confirm-modal') as HTMLDialogElement
+
+    if (modal) {
+      modal.close()
+    }
   }
 
   return (
-    <dialog id="modal" className="modal">
+    <dialog id="delete-confirm-modal" className="modal">
       <div className="modal-box">
         <h3 className="font-bold text-lg">Delete files</h3>
         <p className="py-4 text-warning">

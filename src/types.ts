@@ -1,5 +1,5 @@
 import { Scan } from '@prisma/client'
-import { ExpandedState } from '@tanstack/react-table'
+import { ExpandedState, VisibilityState } from '@tanstack/react-table'
 import { z } from 'zod'
 import { Metadata } from './main/handlers/audioMetadata'
 
@@ -9,8 +9,12 @@ export type DatabaseOperationResult<T> =
 
 export interface TableContextProps {
   expanded: ExpandedState
-  setExpanded: React.Dispatch<React.SetStateAction<ExpandedState>>
+  columnVisibility: VisibilityState
+  setColumnVisibility: React.Dispatch<React.SetStateAction<VisibilityState>>
+  filter: string
   rowSelection: Record<string, boolean>
+  setExpanded: React.Dispatch<React.SetStateAction<ExpandedState>>
+  setFilter: React.Dispatch<React.SetStateAction<string>>
   setRowSelection: React.Dispatch<React.SetStateAction<Record<string, boolean>>>
 }
 

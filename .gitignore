@@ -3,4 +3,10 @@ dist
 out
 *.log*
 prisma/dev.db
+prisma/prod.db
+prisma/prod.db-journal
+prisma/dev.db-journal
 yarn.lock
+.env
+.env.development
+.env.production

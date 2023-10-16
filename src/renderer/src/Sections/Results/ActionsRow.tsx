@@ -17,7 +17,7 @@ export default function ActionsRow(): JSX.Element {
   }, [rowSelection])
 
   const showPrompt = (): void => {
-    const element = document.getElementById('modal') as HTMLDialogElement | null
+    const element = document.getElementById('delete-confirm-modal') as HTMLDialogElement | null
 
     if (element) {
       element.showModal()

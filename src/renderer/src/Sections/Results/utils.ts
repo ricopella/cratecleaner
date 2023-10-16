@@ -38,7 +38,7 @@ export const fuzzyFilter: FilterFn<ResultsData> = (row, columnId, value, addMeta
 
 type MetadataKey = 'album' | 'artist' | 'genre' | 'title' | 'comment' | 'bpm' | 'type'
 
-// if all values are the same, return that value, otherwise return empty string
+// if all values are the same, return that value, otherwise return ''
 export const getCommonValue = (
   subRows: Row<ResultsData>[],
   key: MetadataKey

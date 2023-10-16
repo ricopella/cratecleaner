@@ -1,4 +1,3 @@
-import DebouncedInput from '@renderer/components/DebouncedInput'
 import Loader from '@renderer/components/Loader'
 import Body from '@renderer/components/Table/Body'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
@@ -130,20 +129,20 @@ const columns = [
     },
     enableGrouping: false
   }),
-    columnHelper.display({
-      id: 'album',
-      header: 'Album',
-      cell: (info) => {
-        if (info.row.depth === 0) {
-          return getCommonValue(info.row.subRows, 'artist')
-        }
+  columnHelper.display({
+    id: 'album',
+    header: 'Album',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return getCommonValue(info.row.subRows, 'artist')
+      }
 
-        const row = info.row.original as unknown as DuplicateFile
+      const row = info.row.original as unknown as DuplicateFile
 
-        return row?.metadata?.album ?? ''
-      },
-      enableGrouping: false
-    }),
+      return row?.metadata?.album ?? ''
+    },
+    enableGrouping: false
+  }),
   columnHelper.display({
     id: 'genre',
     header: 'Genre',
@@ -170,7 +169,8 @@ const columns = [
 
         return row?.metadata?.bpm ?? ''
       },
-      enableGrouping: false
+      enableGrouping: false,
+      size: 16
     }),
   columnHelper.display({
     id: 'type',
@@ -229,14 +229,22 @@ const columns = [
 
 const Table = ({ id }: { id: string }): JSX.Element => {
   const { state } = useMain()
-  const { expanded, setExpanded, rowSelection, setRowSelection } = useTableContext()
+  const {
+    expanded,
+    filter,
+    columnVisibility,
+    setColumnVisibility,
+    setFilter,
+    setExpanded,
+    rowSelection,
+    setRowSelection
+  } = useTableContext()
   const scan = state.scans[id]
   const results: ScanResults = scan.results ?? { files: {} }
   const [sorted, setSorting] = useState<SortingState>([])
   const data: ResultsData[] = useMemo(() => {
     return transformScanResultsToRows(results, scan)
   }, [results, scan])
-  const [globalFilter, setGlobalFilter] = useState('')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const table = useReactTable<ResultsData>({
@@ -252,8 +260,9 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     globalFilterFn: fuzzyFilter,
     onColumnFiltersChange: setColumnFilters,
     onExpandedChange: setExpanded,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: setFilter,
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: setSorting,
     getSubRows: (row) => {
       return row.files.map((file, fileIndex) => ({
@@ -271,12 +280,13 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     },
     state: {
       columnVisibility: {
-        crates: scan.configuration.includeCrates
+        ...columnVisibility,
+        crates: scan.configuration.includeCrates ? columnVisibility.crates : false
       },
       expanded,
       rowSelection: rowSelection,
       sorting: sorted,
-      globalFilter,
+      globalFilter: filter,
       columnFilters
     }
   })
@@ -300,11 +310,6 @@ const Table = ({ id }: { id: string }): JSX.Element => {
 
     return (
       <>
-        <DebouncedInput
-          value={globalFilter ?? ''}
-          onChange={(value): void => setGlobalFilter(String(value))}
-          placeholder="Search by name..."
-        />
         <table className={classNames.table}>
           <Header<ResultsData> headerGroups={table.getHeaderGroups()} />
           <Body table={table} noResultsMessage="No duplicate files found in this scan." />

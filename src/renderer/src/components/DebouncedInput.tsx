@@ -4,11 +4,13 @@ export default memo(function DebouncedInput({
   value: initialValue,
   onChange,
   debounce = 500,
+  className,
   ...props
 }: {
   value: string | number
   onChange: (value: string | number) => void
   debounce?: number
+  className?: string
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'>): JSX.Element {
   const [value, setValue] = useState(initialValue)
 
@@ -28,7 +30,7 @@ export default memo(function DebouncedInput({
     <input
       {...props}
       value={value}
-      className="input input-bordered w-full max-w-xs input-sm mb-2 input-ghost"
+      className={`input input-bordered w-full max-w-xs input-sm input-ghost ${className ?? ''}`}
       onChange={(e): void => setValue(e.target.value)}
     />
   )
