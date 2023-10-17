@@ -1,3 +1,4 @@
+import { SET_ERROR_MESSAGE } from '@src/constants'
 import { useEffect, useRef } from 'react'
 
 type PollingCallback<T> = () => Promise<T>
@@ -6,7 +7,7 @@ type DispatchCallback<T> = (data: T) => void
 export const usePolling = <T>(
   callback: PollingCallback<T>,
   interval: number,
-  dispatch: DispatchCallback<T>
+  dispatch: DispatchCallback<T | { type: typeof SET_ERROR_MESSAGE; payload: { error: string } }>
 ): void => {
   const intervalId = useRef<NodeJS.Timeout | null>(null)
 
@@ -16,8 +17,17 @@ export const usePolling = <T>(
         const result = await callback()
         dispatch(result)
       } catch (error) {
-        // TODO: Handle errors from the polling callback.
         console.error(error)
+
+        const { message } = error as Error
+        dispatch({
+          type: SET_ERROR_MESSAGE,
+          payload: { error: message }
+        })
+
+        if (intervalId.current) {
+          clearInterval(intervalId.current)
+        }
       }
     }
 
