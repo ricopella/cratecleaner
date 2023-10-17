@@ -14,8 +14,8 @@ export const registerFileDialogHandler = (): void => {
     })
 
     if (!result.canceled && result.filePaths.length > 0) {
-      await createCrateSrc(result.filePaths[0])
-      // TODO: support multiple files
+      await Promise.all(result.filePaths.map((path) => createCrateSrc(path)))
+
       event.sender.send(NEW_CRATE_SRC, result.filePaths[0])
     }
   })
