@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 
 const classNames = {
-  errorTextWrapper: 'transition-all duration-500',
-  show: 'opacity-100 translate-y-0',
-  hide: 'opacity-0 translate-y-5',
+  errorTextWrapper: 'transition-all duration-500 transition-max-height ease-in-out overflow-y-auto',
+  show: 'opacity-100 translate-y-0 max-h-[10rem]',
+  hide: 'opacity-0 translate-y-5 max-h-4',
   errorText: 'text-sm text-error'
 }
 

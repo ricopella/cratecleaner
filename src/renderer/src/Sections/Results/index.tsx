@@ -33,9 +33,9 @@ declare module '@tanstack/table-core' {
 }
 
 const classNames = {
-  container: 'h-full w-full grid grid-rows-max-1fr-max gap-2',
+  container: 'h-full w-full grid grid-rows-1fr-max sm:grid-rows-max-1fr-max gap-2',
   table: 'table table-xs',
-  tableContainer: 'h-full w-full overflow-y-scroll'
+  tableContainer: 'h-full w-full overflow-y-auto'
 }
 
 const columnHelper = createColumnHelper<ResultsData>()
@@ -157,21 +157,21 @@ const columns = [
     },
     enableGrouping: false
   }),
-    columnHelper.display({
-      id: 'bpm',
-      header: 'BPM',
-      cell: (info) => {
-        if (info.row.depth === 0) {
-          return getCommonValue(info.row.subRows, 'bpm')
-        }
+  columnHelper.display({
+    id: 'bpm',
+    header: 'BPM',
+    cell: (info) => {
+      if (info.row.depth === 0) {
+        return getCommonValue(info.row.subRows, 'bpm')
+      }
 
-        const row = info.row.original as unknown as DuplicateFile
+      const row = info.row.original as unknown as DuplicateFile
 
-        return row?.metadata?.bpm ?? ''
-      },
-      enableGrouping: false,
-      size: 16
-    }),
+      return row?.metadata?.bpm ?? ''
+    },
+    enableGrouping: false,
+    size: 16
+  }),
   columnHelper.display({
     id: 'type',
     header: 'Type',
@@ -302,8 +302,9 @@ const Table = ({ id }: { id: string }): JSX.Element => {
   const renderContent = (): JSX.Element => {
     if (scan.status === 'pending') {
       return (
-        <div className="h-full w-full flex justify-center items-center">
+        <div className="h-full w-full flex flex-col justify-center items-center">
           <Loader />
+          <div className="text-xs text-warning">Do not close the application until finished.</div>
         </div>
       )
     }

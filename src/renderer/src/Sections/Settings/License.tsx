@@ -11,7 +11,7 @@ export default function License(): JSX.Element {
         <span className="font-bold">Crate Cleaner</span> by{' '}
         <a
           href="https://narinsun.com"
-          className="text-blue-500 hover:underline"
+          className=" hover:underline"
           rel="cc:attributionURL dct:creator"
         >
           Narin Rico Sundarabhaya
@@ -21,7 +21,7 @@ export default function License(): JSX.Element {
           href="http://creativecommons.org/licenses/by-nc/4.0/?ref=chooser-v1"
           target="_blank"
           rel="license noopener noreferrer"
-          className="inline-flex items-center text-blue-500 hover:underline"
+          className="inline-flex items-center hover:underline"
         >
           Attribution-NonCommercial 4.0 International
           <CcIcon className="h-5 w-5 ml-2" />

@@ -23,7 +23,7 @@ const TableBody = <T extends object>({
 
           return (
             <React.Fragment key={`wrapper_${row.id}_${i}`}>
-              <tr key={`${row.id}_${i}`} className={bgColorClass}>
+              <tr key={`${row.id}_${i}`} className={`${bgColorClass} px-4`}>
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}

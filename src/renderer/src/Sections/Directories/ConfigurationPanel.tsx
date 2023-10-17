@@ -36,7 +36,7 @@ export default function ConfigurationPanel(): JSX.Element {
 
   return (
     <div className="rounded-t bg-base-200 p-4 border-b-2 border-base-content border-opacity-5">
-      <div className="form-control flex-row items-center gap-8">
+      <div className="form-control grid sm:grid-cols-max-max-max items-center sm:gap-8">
         <div className="flex items-center">
           <label className={classNames.label}>
             <span className={classNames.labelText}>File Type:</span>
