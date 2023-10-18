@@ -1,4 +1,5 @@
 import { useTableContext } from '@renderer/context/TableContext'
+import { useEffect } from 'react'
 
 const ColumnSelection = ({
   columns
@@ -9,6 +10,16 @@ const ColumnSelection = ({
   }[]
 }): JSX.Element => {
   const { columnVisibility, setColumnVisibility } = useTableContext()
+
+  useEffect(() => {
+    // on mount set all to true except crates
+    setColumnVisibility((cur) => {
+      return columns.reduce(
+        (acc, col) => ({ ...acc, [col.key]: col.key === 'crates' ? cur.crates ?? true : true }),
+        {}
+      )
+    })
+  }, [])
 
   const handleCheckboxChange = (columnName: string): void => {
     setColumnVisibility((prevState) => ({

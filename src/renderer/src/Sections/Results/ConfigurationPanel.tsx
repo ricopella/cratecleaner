@@ -41,7 +41,7 @@ export default function ConfigurationPanel({ id }: { id: string }): JSX.Element 
             <div className="stat-title text-sm">Deleted Count</div>
             <div className="stat-value">{deletedCount}</div>
             <div className="stat-desc">
-              {scan.deletedFiles.length === 0 ? (
+              {errors.length === 0 ? (
                 ''
               ) : (
                 <div className="tooltip before:!max-w-max break-word " data-tip={errors}>
