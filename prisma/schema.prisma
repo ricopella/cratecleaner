@@ -9,7 +9,7 @@ datasource db {
 
 model CrateSrc {
   id   String @id @default(uuid())
-  path String
+  path String @unique
   type String
 }
 
