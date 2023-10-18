@@ -1,4 +1,4 @@
-import { DuplicateFile, ExtendedScan, ResultsData, ScanResults } from '@src/types'
+import { CommonValue, DuplicateFile, ExtendedScan, ResultsData, ScanResults } from '@src/types'
 import { rankItem } from '@tanstack/match-sorter-utils'
 import { FilterFn, Row } from '@tanstack/react-table'
 import { all, comparator, equals, flatten, head, keys, map, path, sort } from 'ramda'
@@ -39,10 +39,7 @@ export const fuzzyFilter: FilterFn<ResultsData> = (row, columnId, value, addMeta
 type MetadataKey = 'album' | 'artist' | 'genre' | 'title' | 'comment' | 'bpm' | 'type'
 
 // if all values are the same, return that value, otherwise return ''
-export const getCommonValue = (
-  subRows: Row<ResultsData>[],
-  key: MetadataKey
-): string | number | string[] | null | undefined => {
+export const getCommonValue = (subRows: Row<ResultsData>[], key: MetadataKey): CommonValue => {
   const values = map(
     (row) =>
       path(key === 'type' ? [key] : ['metadata', key], row.original as unknown as DuplicateFile),

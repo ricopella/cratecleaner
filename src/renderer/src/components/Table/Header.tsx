@@ -19,7 +19,7 @@ const TableHeader = <T extends object>({ headerGroups }: TableHeaderProps<T>): J
               style={{
                 width: header.getSize()
               }}
-              onClick={header.column.getToggleSortingHandler}
+              onClick={header.column.getToggleSortingHandler()}
             >
               {header.isPlaceholder ? null : (
                 <div>

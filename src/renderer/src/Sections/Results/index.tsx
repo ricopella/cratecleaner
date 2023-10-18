@@ -3,13 +3,13 @@ import Body from '@renderer/components/Table/Body'
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
 import { useMain } from '@renderer/context/MainContext'
 import { TableProvider, useTableContext } from '@renderer/context/TableContext'
-import { DuplicateFile, ResultsData, ScanResults } from '@src/types'
+import { CommonValue, DuplicateFile, ResultsData, ScanResults } from '@src/types'
 import { RankingInfo } from '@tanstack/match-sorter-utils'
 import {
+  ColumnDef,
   ColumnFiltersState,
   FilterFn,
   SortingState,
-  createColumnHelper,
   getCoreRowModel,
   getFilteredRowModel,
   getSortedRowModel,
@@ -38,195 +38,6 @@ const classNames = {
   tableContainer: 'h-full w-full overflow-y-auto'
 }
 
-const columnHelper = createColumnHelper<ResultsData>()
-
-const columns = [
-  columnHelper.accessor('id', {
-    id: 'id',
-    enableGrouping: true,
-    size: 16,
-    header: undefined,
-    cell: ({ row }) => (
-      <div
-        style={{
-          paddingLeft: `${row.depth * 2}rem`
-        }}
-      >
-        <>
-          {row.depth === 0 ? (
-            <>
-              {row.getCanExpand() ? (
-                <button
-                  className="btn btn-ghost btn-xs rounded-btn"
-                  {...{
-                    onClick: row.getToggleExpandedHandler()
-                  }}
-                >
-                  {row.getIsExpanded() ? (
-                    <ArrowRight className="w-2 h-2 text-accent-content fill-current transform rotate-90" />
-                  ) : (
-                    <ArrowRight className="w-2 h-2 text-accent-content fill-current" />
-                  )}
-                </button>
-              ) : null}
-            </>
-          ) : (
-            <IndeterminateCheckbox
-              {...{
-                checked: row.getIsSelected(),
-                indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler()
-              }}
-            />
-          )}
-        </>
-      </div>
-    )
-  }),
-  columnHelper.accessor('name', {
-    cell: (info) => info.getValue(),
-    enableGrouping: false
-  }),
-
-  columnHelper.display({
-    id: 'path',
-    header: 'Path',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return ''
-      }
-
-      const row = info.row.original as unknown as DuplicateFile
-
-      return row?.path ?? ''
-    },
-    enableGrouping: false
-  }),
-  columnHelper.display({
-    id: 'title',
-    header: 'Title',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return getCommonValue(info.row.subRows, 'title')
-      }
-
-      const row = info.row.original as unknown as DuplicateFile
-      return row?.metadata?.title ?? ''
-    },
-    enableGrouping: false
-  }),
-  columnHelper.display({
-    id: 'artist',
-    header: 'Artist',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return getCommonValue(info.row.subRows, 'artist')
-      }
-
-      const row = info.row.original as unknown as DuplicateFile
-
-      return row?.metadata?.artist ?? ''
-    },
-    enableGrouping: false
-  }),
-  columnHelper.display({
-    id: 'album',
-    header: 'Album',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return getCommonValue(info.row.subRows, 'artist')
-      }
-
-      const row = info.row.original as unknown as DuplicateFile
-
-      return row?.metadata?.album ?? ''
-    },
-    enableGrouping: false
-  }),
-  columnHelper.display({
-    id: 'genre',
-    header: 'Genre',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return getCommonValue(info.row.subRows, 'genre')
-      }
-
-      const row = info.row.original as unknown as DuplicateFile
-
-      return row?.metadata?.genre ?? ''
-    },
-    enableGrouping: false
-  }),
-  columnHelper.display({
-    id: 'bpm',
-    header: 'BPM',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return getCommonValue(info.row.subRows, 'bpm')
-      }
-
-      const row = info.row.original as unknown as DuplicateFile
-
-      return row?.metadata?.bpm ?? ''
-    },
-    enableGrouping: false,
-    size: 16
-  }),
-  columnHelper.display({
-    id: 'type',
-    header: 'Type',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        return getCommonValue(info.row.subRows, 'type')
-      }
-
-      const row = info.row.original as unknown as DuplicateFile
-
-      return row?.type ?? ''
-    },
-    enableGrouping: false,
-    size: 32
-  }),
-
-  columnHelper.display({
-    id: 'crates',
-    header: 'Crates',
-    cell: (info) => {
-      if (info.row.depth === 0) {
-        const count = info.row.subRows.reduce((acc, row) => {
-          // @ts-ignore
-          return acc + row.original?.crates?.length ?? 0
-        }, 0)
-
-        return count
-      }
-
-      const row = info.row.original as unknown as DuplicateFile
-
-      const crateCount = row.crates.length
-
-      if (crateCount === 0) {
-        return ''
-      }
-
-      return (
-        <div className="tooltip" data-tip={row.crates.join(', ')}>
-          <div className="badge badge-neutral">{crateCount}</div>
-        </div>
-      )
-    },
-    enableGrouping: false,
-    size: 32
-  }),
-  columnHelper.display({
-    id: 'duplicateCount',
-    size: 24,
-    header: () => <span>Dupe Count</span>,
-    cell: ({ row }) => (row.depth === 0 ? row.original.files.length : ''),
-    enableGrouping: false
-  })
-]
-
 const Table = ({ id }: { id: string }): JSX.Element => {
   const { state } = useMain()
   const {
@@ -247,13 +58,214 @@ const Table = ({ id }: { id: string }): JSX.Element => {
   }, [results, scan])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+  const columns = useMemo<ColumnDef<ResultsData>[]>(
+    () => [
+      {
+        accessorKey: 'id',
+        enableGrouping: true,
+        size: 16,
+        header: undefined,
+        cell: ({ row }) => (
+          <div
+            style={{
+              paddingLeft: `${row.depth * 2}rem`
+            }}
+          >
+            <>
+              {row.depth === 0 ? (
+                <>
+                  {row.getCanExpand() ? (
+                    <button
+                      className="btn btn-ghost btn-xs rounded-btn"
+                      {...{
+                        onClick: row.getToggleExpandedHandler()
+                      }}
+                    >
+                      {row.getIsExpanded() ? (
+                        <ArrowRight className="w-2 h-2 text-accent-content fill-current transform rotate-90" />
+                      ) : (
+                        <ArrowRight className="w-2 h-2 text-accent-content fill-current" />
+                      )}
+                    </button>
+                  ) : null}
+                </>
+              ) : (
+                <IndeterminateCheckbox
+                  {...{
+                    checked: row.getIsSelected(),
+                    indeterminate: row.getIsSomeSelected(),
+                    onChange: row.getToggleSelectedHandler()
+                  }}
+                />
+              )}
+            </>
+          </div>
+        )
+      },
+      {
+        accessorKey: 'name',
+        cell: (info) => info.getValue(),
+        enableGrouping: false,
+        enableSorting: true
+      },
+      {
+        id: 'path',
+        accessorKey: 'path',
+        header: 'Path',
+        enableSorting: true,
+        enableGrouping: false,
+        cell: (info): string => {
+          if (info.row.depth === 0) {
+            return ''
+          }
+
+          const row = info.row.original as unknown as DuplicateFile
+
+          return row?.path ?? ''
+        }
+      },
+      {
+        id: 'title',
+        accessorKey: 'title',
+        header: 'Title',
+        cell: (info): CommonValue => {
+          if (info.row.depth === 0) {
+            return getCommonValue(info.row.subRows, 'title')
+          }
+
+          const row = info.row.original as unknown as DuplicateFile
+          return row?.metadata?.title ?? ''
+        },
+        enableGrouping: false
+      },
+      {
+        id: 'album',
+        accessorKey: 'album',
+        header: 'Album',
+        enableSorting: true,
+        cell: (info): CommonValue => {
+          if (info.row.depth === 0) {
+            return getCommonValue(info.row.subRows, 'artist')
+          }
+
+          const row = info.row.original as unknown as DuplicateFile
+
+          return row?.metadata?.album ?? ''
+        },
+        enableGrouping: false
+      },
+      {
+        id: 'genre',
+        accessorKey: 'genre',
+        header: 'Genre',
+        enableSorting: true,
+        cell: (info): CommonValue => {
+          if (info.row.depth === 0) {
+            return getCommonValue(info.row.subRows, 'genre')
+          }
+
+          const row = info.row.original as unknown as DuplicateFile
+
+          return row?.metadata?.genre ?? ''
+        },
+        enableGrouping: false
+      },
+      {
+        id: 'bpm',
+        header: 'BPM',
+        accessorKey: 'bpm',
+        enableSorting: true,
+        cell: (info): CommonValue => {
+          if (info.row.depth === 0) {
+            return getCommonValue(info.row.subRows, 'bpm')
+          }
+
+          const row = info.row.original as unknown as DuplicateFile
+
+          return row?.metadata?.bpm ?? ''
+        },
+        enableGrouping: false,
+        size: 16
+      },
+      {
+        id: 'type',
+        accessorKey: 'type',
+        header: 'Type',
+        enableSorting: false,
+        cell: (info): CommonValue => {
+          if (info.row.depth === 0) {
+            return getCommonValue(info.row.subRows, 'type')
+          }
+
+          const row = info.row.original as unknown as DuplicateFile
+
+          return row?.type ?? ''
+        },
+        enableGrouping: false,
+        size: 32
+      },
+      {
+        id: 'crates',
+        accessorKey: 'crates',
+        header: 'Crates',
+        accessorFn: (row): number => {
+          if (row?.files?.length === 0) {
+            // @ts-ignore
+            return (row.crates || []).length
+          }
+
+          return row.files.reduce((acc, file) => {
+            return acc + (file.crates || []).length
+          }, 0)
+        },
+        cell: (info): JSX.Element | number | string => {
+          if (info.row.depth === 0) {
+            const count = info.row.subRows.reduce((acc, row) => {
+              // @ts-ignore
+              return acc + row.original?.crates?.length ?? 0
+            }, 0)
+
+            return count
+          }
+
+          const row = info.row.original as unknown as DuplicateFile
+
+          const crateCount = row.crates.length
+
+          if (crateCount === 0) {
+            return ''
+          }
+
+          return (
+            <div className="tooltip" data-tip={row.crates.join(', ')}>
+              <div className="badge badge-neutral">{crateCount}</div>
+            </div>
+          )
+        },
+        enableGrouping: false,
+        size: 32
+      },
+      {
+        id: 'duplicateCount',
+        size: 24,
+        accessorKey: 'duplicateCount',
+        accessorFn: (row) => row.files.length,
+        header: 'Dupe Count',
+        cell: ({ row }) => (row.depth === 0 ? row.original.files.length : ''),
+        enableGrouping: false,
+        enableSorting: true
+      }
+    ],
+    []
+  )
+
   const table = useReactTable<ResultsData>({
     columnResizeMode: 'onChange',
     columns,
     data,
     debugTable: true,
     enableRowSelection: true,
-    enableSorting: false,
+    enableSorting: true,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),

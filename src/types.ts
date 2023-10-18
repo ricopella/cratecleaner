@@ -117,3 +117,5 @@ export type Subcrate = {
   name: string
   songs: CrateSong[]
 }
+
+export type CommonValue = string | number | string[] | null | undefined
