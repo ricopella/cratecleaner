@@ -112,7 +112,7 @@ const Table = ({ id }: { id: string }): JSX.Element => {
         id: 'path',
         accessorKey: 'path',
         header: 'Path',
-        enableSorting: true,
+        enableSorting: false,
         enableGrouping: false,
         cell: (info): string => {
           if (info.row.depth === 0) {
@@ -128,6 +128,7 @@ const Table = ({ id }: { id: string }): JSX.Element => {
         id: 'title',
         accessorKey: 'title',
         header: 'Title',
+        enableSorting: false,
         cell: (info): CommonValue => {
           if (info.row.depth === 0) {
             return getCommonValue(info.row.subRows, 'title')
@@ -142,7 +143,7 @@ const Table = ({ id }: { id: string }): JSX.Element => {
         id: 'album',
         accessorKey: 'album',
         header: 'Album',
-        enableSorting: true,
+        enableSorting: false,
         cell: (info): CommonValue => {
           if (info.row.depth === 0) {
             return getCommonValue(info.row.subRows, 'artist')
@@ -158,7 +159,7 @@ const Table = ({ id }: { id: string }): JSX.Element => {
         id: 'genre',
         accessorKey: 'genre',
         header: 'Genre',
-        enableSorting: true,
+        enableSorting: false,
         cell: (info): CommonValue => {
           if (info.row.depth === 0) {
             return getCommonValue(info.row.subRows, 'genre')
@@ -174,7 +175,7 @@ const Table = ({ id }: { id: string }): JSX.Element => {
         id: 'bpm',
         header: 'BPM',
         accessorKey: 'bpm',
-        enableSorting: true,
+        enableSorting: false,
         cell: (info): CommonValue => {
           if (info.row.depth === 0) {
             return getCommonValue(info.row.subRows, 'bpm')
