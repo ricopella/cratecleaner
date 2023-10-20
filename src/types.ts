@@ -35,7 +35,8 @@ export const ScanConfigurationSchema = z.object({
   directoryPaths: z.array(z.string()),
   type: z.enum(['audio', 'image']),
   includeCrates: z.boolean(),
-  matchType: z.enum(['contents', 'name', 'size'])
+  matchType: z.enum(['contents', 'name', 'size']),
+  scanType: z.enum(['duplicate', 'not_crated'])
 })
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>

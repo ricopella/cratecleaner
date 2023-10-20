@@ -34,9 +34,18 @@ export default function ConfigurationPanel(): JSX.Element {
     })
   }
 
+  const changeScanType = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    dispatch({
+      type: 'UPDATE_SCAN_CONFIGURATION_SCAN_TYPE',
+      payload: {
+        scanType: e.target.value as 'duplicate' | 'not_crated'
+      }
+    })
+  }
+
   return (
     <div className="rounded-t bg-base-200 p-4 border-b-2 border-base-content border-opacity-5">
-      <div className="form-control grid sm:grid-cols-max-max-max items-center sm:gap-8">
+      <div className="form-control grid sm:grid-cols-max-max-max-max items-center sm:gap-8">
         <div className="flex items-center">
           <label className={classNames.label}>
             <span className={classNames.labelText}>File Type:</span>
@@ -52,6 +61,20 @@ export default function ConfigurationPanel(): JSX.Element {
             </option>
           </select>
         </div>
+        <div className="flex items-center">
+          <label className={classNames.label}>
+            <span className={classNames.labelText}>Scan Type:</span>
+          </label>
+          <select
+            className="select select-xs select-bordered"
+            defaultValue={state.scanConfiguration.scanType}
+            onChange={changeScanType}
+          >
+            <option value={'duplicate'}>Duplicates</option>
+            <option value={'not_crated'}>Not in crate</option>
+          </select>
+        </div>
+
         <div className="flex items-center">
           <label className={classNames.label}>
             <span className={classNames.labelText}>Match Type:</span>
@@ -77,6 +100,7 @@ export default function ConfigurationPanel(): JSX.Element {
             defaultChecked
             onChange={changeIncludeCrates}
             type="checkbox"
+            disabled={state.scanConfiguration.scanType === 'not_crated'}
           />
         </div>
       </div>

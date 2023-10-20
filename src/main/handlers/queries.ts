@@ -29,6 +29,7 @@ import {
 import { ScanConfiguration } from '../../types'
 import { deleteFiles as deleteFilesUtil } from '../utils'
 import { getDuplicates } from './duplicates'
+import { getNotCratedFiles } from './notCrated'
 import { getCratesAndFiles, getDuplicatesWithMetadata } from './utils'
 
 export const registerQueryHandler = (): void => {
@@ -66,11 +67,19 @@ export const registerQueryHandler = (): void => {
 
     // Start the duplicate scan in a non-blocking manner
     setImmediate(async () => {
+      let scanResults
+
       try {
-        const scanResults = await Promise.all([
-          getDuplicates(configuration),
-          configuration.includeCrates ? getCratesAndFiles() : { crates: [], errorMessages: [] }
-        ])
+        if (configuration.scanType === 'duplicate') {
+          scanResults = await Promise.all([
+            getDuplicates(configuration),
+            configuration.includeCrates ? getCratesAndFiles() : { crates: [], errorMessages: [] }
+          ])
+        }
+
+        if (configuration.scanType === 'not_crated') {
+          scanResults = await getNotCratedFiles(configuration)
+        }
 
         const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults, configuration)
         ipcMain.emit(SCAN_PROGRESS, { progress: 100 })

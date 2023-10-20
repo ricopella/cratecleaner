@@ -14,7 +14,13 @@ export const transformScan = (
   if (configurationRes.success === false || resultsRes.success === false) {
     return {
       ...scan,
-      configuration: { directoryPaths: [], includeCrates: false, matchType: 'name', type: 'audio' },
+      configuration: {
+        directoryPaths: [],
+        includeCrates: false,
+        matchType: 'name',
+        type: 'audio',
+        scanType: 'duplicate'
+      },
       results: { files: {} },
       deletedFiles
     }

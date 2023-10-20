@@ -28,7 +28,8 @@ export const initialState: MainState = {
   scanConfiguration: {
     type: 'audio',
     includeCrates: true,
-    matchType: 'name'
+    matchType: 'name',
+    scanType: 'duplicate'
   }
 }
 
@@ -111,6 +112,8 @@ export function directoryReducer(state: MainState, action: MainActions): MainSta
       return assocPath(['scanConfiguration', 'matchType'], action.payload.matchType, state)
     case 'UPDATE_SCAN_CONFIGURATION_INCLUDE_CRATES':
       return assocPath(['scanConfiguration', 'includeCrates'], action.payload.includeCrates, state)
+    case 'UPDATE_SCAN_CONFIGURATION_SCAN_TYPE':
+      return assocPath(['scanConfiguration', 'scanType'], action.payload.scanType, state)
     default:
       return state
   }
