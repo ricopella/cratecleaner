@@ -1,7 +1,10 @@
+import { concat } from 'ramda'
 import { getCrateSrcs } from '../../db/actions'
 import { CrateFile, FileInfo, FileWithMetadata, ScanConfiguration } from '../../types'
 import { listCrateFiles } from '../serato'
 import { processBatch } from './audioMetadata'
+import { getDuplicates } from './duplicates'
+import { getNotCratedFiles } from './notCrated'
 
 export const findCratesForFilePath = (crates: CrateFile[], targetPath: string): string[] => {
   const pathInCrates: string[] = []
@@ -83,4 +86,31 @@ export const getCratesAndFiles = async (): Promise<{
   const res = await listCrateFiles(cratePaths.length > 0 ? cratePaths : undefined)
 
   return res
+}
+
+export const scanTypeHandlers: {
+  duplicate: (configuration: ScanConfiguration) => Promise<{
+    files: Record<string, FileWithMetadata[]>
+    errors: string[]
+  }>
+  not_crated: (configuration: ScanConfiguration) => Promise<{
+    files: Record<string, FileWithMetadata[]>
+    errors: string[]
+  }>
+} = {
+  duplicate: async (configuration) => {
+    const scanResults = await Promise.all([
+      getDuplicates(configuration),
+      configuration.includeCrates ? getCratesAndFiles() : { crates: [], errorMessages: [] }
+    ])
+    const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults, configuration)
+    return {
+      files: resultsWithMetadata.size > 0 ? Object.fromEntries(resultsWithMetadata) : {},
+      errors: concat(scanResults[0].errors, scanResults[1].errorMessages)
+    }
+  },
+  not_crated: async (configuration) => {
+    const unCratedResults = await getNotCratedFiles(configuration)
+    return unCratedResults
+  }
 }
