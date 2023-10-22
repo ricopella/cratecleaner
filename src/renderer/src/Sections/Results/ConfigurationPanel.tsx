@@ -9,7 +9,7 @@ import ErrorIcon from '../../assets/error.svg?react'
 export default function ConfigurationPanel({ id }: { id: string }): JSX.Element {
   const { state } = useMain()
   const scan = state.scans[id]
-  const { type, matchType, includeCrates } = scan.configuration
+  const { type, matchType, includeCrates, scanType } = scan.configuration
   const { filter, setFilter } = useTableContext()
 
   const deletedCount = useMemo(
@@ -28,8 +28,9 @@ export default function ConfigurationPanel({ id }: { id: string }): JSX.Element 
   return (
     <div className="p-4 border-2 border-base-200 rounded-md hidden sm:block">
       <div className="grid grid-cols-1fr-1fr-max gap-4">
-        <div className="grid md:grid-cols-max-max-max md:gap-4 gap-2 items-center">
+        <div className="grid md:grid-cols-max-max-max-max md:gap-4 gap-2 items-center">
           <div className="badge text-xs">Type: {type}</div>
+          <div className="badge text-xs">Scan Type: {scanType.replace('_', ' ')}</div>
           <div className="badge text-xs">Match Type: {matchType}</div>
           <div className="badge text-xs">
             {includeCrates ? 'Crates Included' : 'Crates Excluded'}
