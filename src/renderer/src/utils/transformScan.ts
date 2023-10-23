@@ -12,6 +12,10 @@ export const transformScan = (
   const deletedFiles = (scan.deletedFiles || []).map((f) => transformDeletedFiles(f))
 
   if (configurationRes.success === false || resultsRes.success === false) {
+    console.error({
+      configuration: configurationRes,
+      results: resultsRes
+    })
     return {
       ...scan,
       configuration: {
@@ -19,7 +23,7 @@ export const transformScan = (
         includeCrates: false,
         matchType: 'name',
         type: 'audio',
-        scanType: 'duplicate'
+        scanType: configurationRes.success ? configurationRes.data.scanType : 'duplicate'
       },
       results: { files: {} },
       deletedFiles

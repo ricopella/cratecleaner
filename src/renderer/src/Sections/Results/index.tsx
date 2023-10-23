@@ -80,15 +80,20 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: setSorting,
     getSubRows: (row) => {
-      return row.files.map((file, fileIndex) => ({
-        id: `${row.id}-${fileIndex}`,
-        name: file.name,
-        path: file.path,
-        type: file.type,
-        metadata: file.metadata,
-        files: [],
-        crates: file.crates
-      }))
+      if (row.resultType === 'duplicate') {
+        return row.files.map((file, fileIndex) => ({
+          id: `${row.id}-${fileIndex}`,
+          name: file.name,
+          path: file.path,
+          type: file.type,
+          metadata: file.metadata,
+          files: [],
+          crates: file.crates,
+          resultType: 'duplicate'
+        }))
+      }
+
+      return []
     },
     filterFns: {
       fuzzy: fuzzyFilter

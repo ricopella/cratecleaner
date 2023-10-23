@@ -1,7 +1,7 @@
 import { deleteFiles } from '@renderer/actions/ipc'
 import { useMain } from '@renderer/context/MainContext'
 import { ADD_TRACKING_DELETE_ID } from '@src/constants'
-import { ResultsData } from '@src/types'
+import { DuplicateData, NotCratedData, ResultsData } from '@src/types'
 import { memo } from 'react'
 import { v4 } from 'uuid'
 
@@ -20,12 +20,17 @@ export default memo(function deleteWarningModal({
   selectedCount,
   reset
 }: Props): JSX.Element {
-  const { dispatch } = useMain()
-
+  const { dispatch, state } = useMain()
+  const scan = state.scans[id]
   const onDelete = async (): Promise<void> => {
     const filesToDelete = Object.keys(selected).map((key) => {
-      const [rowId, fileIndex] = key.split('.')
-      return data[Number(rowId)].files[Number(fileIndex)].path
+      if (scan?.configuration?.scanType === 'duplicate') {
+        const [rowId, fileIndex] = key.split('.')
+
+        return (data[Number(rowId)] as DuplicateData).files[Number(fileIndex)].path
+      } else {
+        return (data[Number(key)] as NotCratedData).path
+      }
     })
 
     // generate new uuid

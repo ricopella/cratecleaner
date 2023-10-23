@@ -9,10 +9,28 @@ export const transformScanResultsToRows = (
 ): ResultsData[] => {
   const deletedFilesSet = new Set(flatten(map((file) => keys(file.success), scan.deletedFiles)))
 
+  if (scan.configuration.scanType === 'not_crated') {
+    const mapped = Object.entries(results.files)
+      .map(([parentId, files]) => ({
+        resultType: 'not_crated' as const,
+        id: parentId,
+        ...files[0],
+        ...files[0].metadata
+      }))
+      .filter((file) => !deletedFilesSet.has(file.path))
+
+    const sortedResults = sort(
+      comparator((a, b) => a.name < b.name),
+      mapped
+    )
+    return sortedResults
+  }
+
   const mapped = Object.entries(results.files).map(([parentId, files]) => ({
     id: parentId,
     name: files[0].name,
-    files: files.filter((file) => !deletedFilesSet.has(file.path))
+    files: files.filter((file) => !deletedFilesSet.has(file.path)),
+    resultType: 'duplicate' as const
   }))
 
   const sortedResults = sort(

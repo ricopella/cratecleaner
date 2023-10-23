@@ -75,7 +75,6 @@ export const registerQueryHandler = (): void => {
         await updateScanById(results.data.id, 'error', JSON.stringify({ error }))
       }
     })
-
     return results
   })
 

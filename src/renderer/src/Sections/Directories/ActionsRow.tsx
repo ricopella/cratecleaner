@@ -65,10 +65,8 @@ export default function ActionsRow(): JSX.Element {
       })
       return
     }
-
     // causing an error log bc the insert is not in right shape
     const scan = transformScan(res.data)
-
     // add scan ID to main state
     dispatch({
       type: ADD_NEW_SCAN,

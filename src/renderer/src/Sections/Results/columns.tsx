@@ -1,5 +1,5 @@
 import IndeterminateCheckbox from '@renderer/components/Table/InderminateCheckbox'
-import { CommonValue, DuplicateFile, ResultsData } from '@src/types'
+import { CommonValue, DuplicateData, DuplicateFile, ResultsData } from '@src/types'
 import { ColumnDef } from '@tanstack/react-table'
 import ArrowRight from '../../assets/arrow-right.svg?react'
 import { getCommonValue } from './utils'
@@ -155,12 +155,12 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
     accessorKey: 'crates',
     header: 'Crates',
     accessorFn: (row): number => {
-      if (row?.files?.length === 0) {
+      if ((row as DuplicateData)?.files?.length === 0) {
         // @ts-ignore
         return (row.crates || []).length
       }
 
-      return row.files.reduce((acc, file) => {
+      return (row as DuplicateData).files.reduce((acc, file) => {
         return acc + (file.crates || []).length
       }, 0)
     },
@@ -195,9 +195,9 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
     id: 'duplicateCount',
     size: 24,
     accessorKey: 'duplicateCount',
-    accessorFn: (row) => row.files.length,
+    accessorFn: (row) => (row as DuplicateData).files.length,
     header: 'Dupe Count',
-    cell: ({ row }) => (row.depth === 0 ? row.original.files.length : ''),
+    cell: ({ row }) => (row.depth === 0 ? (row.original as DuplicateData).files.length : ''),
     enableGrouping: false,
     enableSorting: true
   }
@@ -237,19 +237,14 @@ export const unCratedColumns: ColumnDef<ResultsData>[] = [
     header: 'Path',
     enableSorting: false,
     enableGrouping: false,
-    cell: (info): string => {
-      // @ts-ignore
-      return info.row.subRows[0]?.original.path ?? ''
-    }
+    cell: (info) => info.getValue()
   },
   {
     id: 'title',
     accessorKey: 'title',
     header: 'Title',
     enableSorting: false,
-    cell: (info): CommonValue => {
-      return getCommonValue(info.row.subRows, 'title')
-    },
+    cell: (info) => info.getValue(),
     enableGrouping: false
   },
   {
@@ -257,9 +252,7 @@ export const unCratedColumns: ColumnDef<ResultsData>[] = [
     accessorKey: 'album',
     header: 'Album',
     enableSorting: false,
-    cell: (info): CommonValue => {
-      return getCommonValue(info.row.subRows, 'artist')
-    },
+    cell: (info) => info.getValue(),
     enableGrouping: false
   },
   {
@@ -267,9 +260,7 @@ export const unCratedColumns: ColumnDef<ResultsData>[] = [
     accessorKey: 'genre',
     header: 'Genre',
     enableSorting: false,
-    cell: (info): CommonValue => {
-      return getCommonValue(info.row.subRows, 'genre')
-    },
+    cell: (info) => info.getValue(),
     enableGrouping: false
   },
   {
@@ -277,9 +268,7 @@ export const unCratedColumns: ColumnDef<ResultsData>[] = [
     header: 'BPM',
     accessorKey: 'bpm',
     enableSorting: false,
-    cell: (info): CommonValue => {
-      return getCommonValue(info.row.subRows, 'bpm')
-    },
+    cell: (info) => info.getValue(),
     enableGrouping: false,
     size: 16
   },
@@ -288,9 +277,7 @@ export const unCratedColumns: ColumnDef<ResultsData>[] = [
     accessorKey: 'type',
     header: 'Type',
     enableSorting: false,
-    cell: (info): CommonValue => {
-      return getCommonValue(info.row.subRows, 'type')
-    },
+    cell: (info) => info.getValue(),
     enableGrouping: false,
     size: 32
   }
