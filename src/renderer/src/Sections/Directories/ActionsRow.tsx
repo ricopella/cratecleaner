@@ -16,7 +16,7 @@ const classNames = {
 export default function ActionsRow(): JSX.Element {
   const { state, dispatch } = useMain()
   const { rowSelection, setRowSelection } = useTableContext()
-  console.log({ state })
+
   const handleRemoveDirectories = async (): Promise<void> => {
     const rowsToDelete = keys(rowSelection)
     const deleteKeys: string[] = state.directorySrcs.reduce((prev: string[], directory, i) => {
