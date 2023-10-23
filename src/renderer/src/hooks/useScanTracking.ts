@@ -53,7 +53,6 @@ const useScanTracking = ({
               clearInterval(intervalId)
 
               const scan = transformScan(scanRes.data)
-
               dispatch({
                 type: UPDATE_SCAN_STATUS,
                 payload: scan

@@ -1,8 +1,8 @@
-import { SCAN_PROGRESS } from '../../constants'
 import { createHash } from 'crypto'
 import { ipcMain } from 'electron'
 import { createReadStream, promises as fs } from 'fs'
 import { basename, extname, resolve } from 'path'
+import { SCAN_PROGRESS } from '../../constants'
 import { FileInfo, ScanConfiguration } from '../../types'
 
 const DUPLICATE_FILE_BLACK_LIST = [
@@ -16,7 +16,7 @@ const DUPLICATE_FILE_BLACK_LIST = [
   'Icon\r'
 ]
 
-async function* getFiles(
+export async function* getFiles(
   dir: string,
   errorMessages: string[]
 ): AsyncGenerator<{ file?: string; errorMessages?: string[] }> {

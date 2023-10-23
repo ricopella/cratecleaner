@@ -28,6 +28,7 @@ export type MainState = {
     type: 'audio' | 'image'
     includeCrates: boolean
     matchType: 'contents' | 'name' | 'size'
+    scanType: 'duplicate' | 'not_crated'
   }
 }
 
@@ -153,6 +154,13 @@ interface UpdateScanConfigurationMatchType {
   }
 }
 
+interface UpdateScanConfigurationScanType {
+  type: 'UPDATE_SCAN_CONFIGURATION_SCAN_TYPE'
+  payload: {
+    scanType: 'duplicate' | 'not_crated'
+  }
+}
+
 export type MainActions =
   | CreateCrateSrcAction
   | GetCrateSrcs
@@ -171,6 +179,7 @@ export type MainActions =
   | UpdateScanConfigurationType
   | UpdateScanConfigurationIncludeCrates
   | UpdateScanConfigurationMatchType
+  | UpdateScanConfigurationScanType
 
 export interface MainContextProps {
   state: MainState

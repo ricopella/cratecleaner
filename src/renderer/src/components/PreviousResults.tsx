@@ -43,7 +43,8 @@ export default function PreviousResults(): JSX.Element {
                       directoryPaths: [],
                       type: 'audio',
                       matchType: 'name',
-                      includeCrates: false
+                      includeCrates: false,
+                      scanType: 'duplicate'
                     },
                     deletedFiles: []
                   }

@@ -35,7 +35,8 @@ export const ScanConfigurationSchema = z.object({
   directoryPaths: z.array(z.string()),
   type: z.enum(['audio', 'image']),
   includeCrates: z.boolean(),
-  matchType: z.enum(['contents', 'name', 'size'])
+  matchType: z.enum(['contents', 'name', 'size']),
+  scanType: z.enum(['duplicate', 'not_crated'])
 })
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>
@@ -57,7 +58,16 @@ const duplicateFile = z.object({
   crates: z.array(z.string())
 })
 
+const notCrateFile = z.object({
+  ...fileMetadata.shape,
+  name: z.string(),
+  path: z.string(),
+  type: z.string()
+})
+
 export type DuplicateFile = z.infer<typeof duplicateFile>
+
+export type NotCrateFile = z.infer<typeof notCrateFile>
 
 const resultsSchema = z.object({
   files: z.record(z.string(), z.array(duplicateFile)),
@@ -75,11 +85,20 @@ export type ExtendedScan = Omit<Scan, 'results' | 'configuration'> & {
   deletedFiles: DeletedFilesSchema[]
 }
 
-export type ResultsData = {
+export type DuplicateData = {
+  resultType: 'duplicate'
   id: string
   name: string
   files: DuplicateFile[]
 }
+
+export type NotCratedData = {
+  resultType: 'not_crated'
+  id: string
+  name: string
+} & NotCrateFile
+
+export type ResultsData = DuplicateData | NotCratedData
 
 export const deletedFilesSchema = z.object({
   id: z.string(),

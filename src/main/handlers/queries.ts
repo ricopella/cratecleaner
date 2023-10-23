@@ -1,5 +1,4 @@
 import { ipcMain } from 'electron'
-import { concat } from 'ramda'
 import {
   ADD_NEW_SCAN,
   DELETE_CRATE_SRC,
@@ -10,8 +9,7 @@ import {
   GET_FILES_DIRECTORIES,
   GET_SCANS_LIST,
   GET_SCAN_BY_ID,
-  REMOVE_DIRECTORIES,
-  SCAN_PROGRESS
+  REMOVE_DIRECTORIES
 } from '../../constants'
 import {
   createScan,
@@ -28,8 +26,7 @@ import {
 } from '../../db/actions'
 import { ScanConfiguration } from '../../types'
 import { deleteFiles as deleteFilesUtil } from '../utils'
-import { getDuplicates } from './duplicates'
-import { getCratesAndFiles, getDuplicatesWithMetadata } from './utils'
+import { scanTypeHandlers } from './utils'
 
 export const registerQueryHandler = (): void => {
   ipcMain.handle(GET_CRATE_SRCS, async () => {
@@ -67,27 +64,17 @@ export const registerQueryHandler = (): void => {
     // Start the duplicate scan in a non-blocking manner
     setImmediate(async () => {
       try {
-        const scanResults = await Promise.all([
-          getDuplicates(configuration),
-          configuration.includeCrates ? getCratesAndFiles() : { crates: [], errorMessages: [] }
-        ])
-
-        const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults, configuration)
-        ipcMain.emit(SCAN_PROGRESS, { progress: 100 })
-
-        await updateScanById(
-          results.data.id,
-          'completed',
-          JSON.stringify({
-            files: resultsWithMetadata.size > 0 ? Object.fromEntries(resultsWithMetadata) : {},
-            errors: concat(scanResults[0].errors, scanResults[1].errorMessages)
-          })
-        )
+        const handler = scanTypeHandlers[configuration.scanType]
+        if (handler) {
+          const scanResults = await handler(configuration)
+          await updateScanById(results.data.id, 'completed', JSON.stringify(scanResults))
+        } else {
+          throw new Error(`Unknown scan type: ${configuration.scanType}`)
+        }
       } catch (error) {
         await updateScanById(results.data.id, 'error', JSON.stringify({ error }))
       }
     })
-
     return results
   })
 

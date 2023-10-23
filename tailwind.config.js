@@ -16,7 +16,8 @@ module.exports = {
         '1fr-max': '1fr max-content',
         'max-1fr': 'max-content 1fr',
         '1fr-1fr-max': '1fr 1fr max-content',
-        '1fr-1fr-max-max': '1fr 1fr max-content max-content'
+        '1fr-1fr-max-max': '1fr 1fr max-content max-content',
+        'max-max-max-max': `repeat(4, max-content)`
       },
       gridTemplateRows: {
         'max-1fr-max': 'max-content 1fr max-content',
