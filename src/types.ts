@@ -41,7 +41,7 @@ export const ScanConfigurationSchema = z.object({
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>
 
-const fileMetadata = z.object({
+const audioFileMetadata = z.object({
   album: z.string().nullish(),
   artist: z.string().nullish(),
   genre: z.array(z.string()).nullish(),
@@ -49,6 +49,21 @@ const fileMetadata = z.object({
   comment: z.array(z.string()).nullish(),
   bpm: z.number().nullish()
 })
+
+const imageFileMetadata = z.object({
+  path: z.string(),
+  fileSize: z.number(),
+  dimensions: z.object({
+    width: z.number().nullish(),
+    height: z.number().nullish()
+  }),
+  created: z.string().nullish(),
+  modified: z.string().nullish(),
+  cameraModel: z.string().nullish(),
+  lensModel: z.string().nullish()
+})
+
+const fileMetadata = z.union([audioFileMetadata, imageFileMetadata])
 
 const duplicateFile = z.object({
   name: z.string(),
@@ -58,8 +73,24 @@ const duplicateFile = z.object({
   crates: z.array(z.string())
 })
 
+const duplicateAudioFile = z.object({
+  name: z.string(),
+  path: z.string(),
+  type: z.string(),
+  metadata: audioFileMetadata.nullish(),
+  crates: z.array(z.string())
+})
+
+const duplicateImageFile = z.object({
+  name: z.string(),
+  path: z.string(),
+  type: z.string(),
+  metadata: imageFileMetadata.nullish(),
+  crates: z.array(z.string())
+})
+
 const notCrateFile = z.object({
-  ...fileMetadata.shape,
+  ...audioFileMetadata.shape,
   name: z.string(),
   path: z.string(),
   type: z.string()
@@ -70,11 +101,18 @@ export type DuplicateFile = z.infer<typeof duplicateFile>
 export type NotCrateFile = z.infer<typeof notCrateFile>
 
 const resultsSchema = z.object({
-  files: z.record(z.string(), z.array(duplicateFile)),
+  files: z.record(z.string(), z.array(duplicateAudioFile)),
+  errors: z.array(z.string()).optional()
+})
+
+const resultsImageSchema = z.object({
+  files: z.record(z.string(), z.array(duplicateImageFile)),
   errors: z.array(z.string()).optional()
 })
 
 export const ScanResultsSchema = z.union([resultsSchema, z.null()])
+export const ScanResultsSchemaWithAudio = z.union([resultsSchema, z.null()])
+export const ScanResultsSchemaWithImage = z.union([resultsImageSchema, z.null()])
 
 export type ScanResults = z.infer<typeof resultsSchema>
 

@@ -4,6 +4,7 @@ import { CrateFile, FileInfo, FileWithMetadata, ScanConfiguration } from '../../
 import { listCrateFiles } from '../serato'
 import { processBatch } from './audioMetadata'
 import { getDuplicates } from './duplicates'
+import { processImageBatch } from './imageMetadata'
 import { getNotCratedFiles } from './notCrated'
 
 export const findCratesForFilePath = (crates: CrateFile[], targetPath: string): string[] => {
@@ -41,16 +42,20 @@ export const getDuplicatesWithMetadata = async (
     .map((file) => file.path)
 
   // only get metadata for audio files
-  const metadataResults = await processBatch(duplicatePaths)
+  const metadataResults =
+    configuration.type === 'audio'
+      ? await processBatch(duplicatePaths)
+      : await processImageBatch(duplicatePaths)
 
   for (const [hash, files] of duplicates.entries()) {
     const mergedFiles: FileWithMetadata[] = files.map((file) => {
       const matchingMetadata = metadataResults.find((metadata) => file.path === metadata.path)
 
       // go through all crates, create a list that contain the files path
-      const crates = configuration.includeCrates
-        ? findCratesForFilePath(results[1].crates, file.path)
-        : []
+      const crates =
+        configuration.includeCrates && configuration.type === 'audio'
+          ? findCratesForFilePath(results[1].crates, file.path)
+          : []
 
       return {
         ...file,
@@ -103,6 +108,7 @@ export const scanTypeHandlers: {
       getDuplicates(configuration),
       configuration.includeCrates ? getCratesAndFiles() : { crates: [], errorMessages: [] }
     ])
+
     const resultsWithMetadata = await getDuplicatesWithMetadata(scanResults, configuration)
     return {
       files: resultsWithMetadata.size > 0 ? Object.fromEntries(resultsWithMetadata) : {},

@@ -2805,6 +2805,13 @@ execa@^7.1.1:
     signal-exit "^3.0.7"
     strip-final-newline "^3.0.0"
 
+exifreader@^4.14.1:
+  version "4.14.1"
+  resolved "https://registry.yarnpkg.com/exifreader/-/exifreader-4.14.1.tgz#b7b13adf79ffd9b804ba588c817f52da8b48634c"
+  integrity sha512-fHtnNeAgD2OaqkoEAoo4znXOOPs5EByem5RkmWIYYnZnNL2dnpyJZqHEAv0WJAwbKs8lX0sM1N/6/Er95UNiPQ==
+  optionalDependencies:
+    "@xmldom/xmldom" "^0.8.8"
+
 exit@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/exit/-/exit-0.1.2.tgz#0632638f8d877cc82107d30a0fff1a17cba1cd0c"

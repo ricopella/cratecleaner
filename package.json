@@ -39,6 +39,7 @@
     "daisyui": "^3.8.2",
     "date-fns": "^2.30.0",
     "electron-updater": "^6.1.1",
+    "exifreader": "^4.14.1",
     "music-metadata": "7.13.4",
     "ramda": "^0.29.0",
     "react-loader-spinner": "^5.4.5",
