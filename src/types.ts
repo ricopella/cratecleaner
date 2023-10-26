@@ -19,6 +19,7 @@ export interface TableContextProps {
 }
 
 export type FileInfo = {
+  fileType: string
   name: string
   path: string
   type: string
@@ -29,7 +30,7 @@ export type FileWithMetadata = FileInfo & {
   crates: string[]
 }
 
-export type Status = 'idle' | 'loading' | 'success' | 'error'
+export type Status = 'idle' | 'pending' | 'success' | 'error'
 
 export const ScanConfigurationSchema = z.object({
   directoryPaths: z.array(z.string()),
@@ -41,7 +42,7 @@ export const ScanConfigurationSchema = z.object({
 
 export type ScanConfiguration = z.infer<typeof ScanConfigurationSchema>
 
-const fileMetadata = z.object({
+const audioFileMetadata = z.object({
   album: z.string().nullish(),
   artist: z.string().nullish(),
   genre: z.array(z.string()).nullish(),
@@ -50,16 +51,45 @@ const fileMetadata = z.object({
   bpm: z.number().nullish()
 })
 
-const duplicateFile = z.object({
+const imageFileMetadata = z.object({
+  path: z.string(),
+  fileSize: z.number(),
+  dimensions: z.object({
+    width: z.number().nullish(),
+    height: z.number().nullish()
+  }),
+  created: z.string().nullish(),
+  modified: z.string().nullish(),
+  cameraModel: z.string().nullish(),
+  lensModel: z.string().nullish()
+})
+
+const baseFileSchema = z.object({
   name: z.string(),
   path: z.string(),
   type: z.string(),
-  metadata: fileMetadata.nullish(),
   crates: z.array(z.string())
 })
 
+const audioFile = baseFileSchema.extend({
+  fileType: z.literal('audio'),
+  metadata: audioFileMetadata.nullish()
+})
+
+const imageFile = baseFileSchema.extend({
+  fileType: z.literal('image'),
+  metadata: imageFileMetadata.nullish()
+})
+
+const duplicateFile = z.union([audioFile, imageFile])
+
+const resultsSchema = z.object({
+  files: z.record(z.string(), z.array(duplicateFile)),
+  errors: z.array(z.string()).optional()
+})
+
 const notCrateFile = z.object({
-  ...fileMetadata.shape,
+  ...audioFileMetadata.shape,
   name: z.string(),
   path: z.string(),
   type: z.string()
@@ -68,11 +98,6 @@ const notCrateFile = z.object({
 export type DuplicateFile = z.infer<typeof duplicateFile>
 
 export type NotCrateFile = z.infer<typeof notCrateFile>
-
-const resultsSchema = z.object({
-  files: z.record(z.string(), z.array(duplicateFile)),
-  errors: z.array(z.string()).optional()
-})
 
 export const ScanResultsSchema = z.union([resultsSchema, z.null()])
 

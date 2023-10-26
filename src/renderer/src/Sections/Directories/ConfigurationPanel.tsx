@@ -1,4 +1,5 @@
 import { useMain } from '@renderer/context/MainContext'
+import { useEffect } from 'react'
 
 const classNames = {
   label: 'label',
@@ -43,6 +44,38 @@ export default function ConfigurationPanel(): JSX.Element {
     })
   }
 
+  const { scanConfiguration } = state
+  const { type, scanType, includeCrates, matchType } = scanConfiguration
+
+  useEffect(() => {
+    if (type === 'image' && scanType === 'not_crated') {
+      dispatch({
+        type: 'UPDATE_SCAN_CONFIGURATION_SCAN_TYPE',
+        payload: {
+          scanType: 'duplicate'
+        }
+      })
+    }
+
+    if (type === 'image' && includeCrates) {
+      dispatch({
+        type: 'UPDATE_SCAN_CONFIGURATION_INCLUDE_CRATES',
+        payload: {
+          includeCrates: false
+        }
+      })
+    }
+
+    if (type === 'audio' && scanType === 'not_crated' && !includeCrates) {
+      dispatch({
+        type: 'UPDATE_SCAN_CONFIGURATION_INCLUDE_CRATES',
+        payload: {
+          includeCrates: true
+        }
+      })
+    }
+  }, [type, scanConfiguration.scanType, dispatch])
+
   return (
     <div className="rounded-t bg-base-200 p-4 border-b-2 border-base-content border-opacity-5">
       <div className="form-control grid sm:grid-cols-max-max-max-max items-center sm:gap-8">
@@ -52,13 +85,11 @@ export default function ConfigurationPanel(): JSX.Element {
           </label>
           <select
             className="select select-xs select-bordered"
-            defaultValue={state.scanConfiguration.type}
+            value={type}
             onChange={changeFileType}
           >
             <option value={'audio'}>Audio</option>
-            <option disabled value={'image'}>
-              Image
-            </option>
+            <option value={'image'}>Image</option>
           </select>
         </div>
         <div className="flex items-center">
@@ -67,8 +98,9 @@ export default function ConfigurationPanel(): JSX.Element {
           </label>
           <select
             className="select select-xs select-bordered"
-            defaultValue={state.scanConfiguration.scanType}
+            value={scanType}
             onChange={changeScanType}
+            disabled={type === 'image'}
           >
             <option value={'duplicate'}>Duplicates</option>
             <option value={'not_crated'}>Not in crate</option>
@@ -81,7 +113,7 @@ export default function ConfigurationPanel(): JSX.Element {
           </label>
           <select
             className="select select-xs select-bordered"
-            defaultValue={state.scanConfiguration.matchType}
+            value={matchType}
             onChange={changeMatchType}
           >
             <option value={'name'}>File Name</option>
@@ -97,10 +129,13 @@ export default function ConfigurationPanel(): JSX.Element {
           </label>
           <input
             className="checkbox checkbox-xs"
-            defaultChecked
+            checked={includeCrates}
             onChange={changeIncludeCrates}
             type="checkbox"
-            disabled={state.scanConfiguration.scanType === 'not_crated'}
+            disabled={
+              state.scanConfiguration.scanType === 'not_crated' ||
+              state.scanConfiguration.type === 'image'
+            }
           />
         </div>
       </div>

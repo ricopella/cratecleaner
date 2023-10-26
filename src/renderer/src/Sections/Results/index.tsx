@@ -19,7 +19,7 @@ import Header from '../../components/Table/Header'
 import ActionsRow from './ActionsRow'
 import ConfigurationPanel from './ConfigurationPanel'
 import DeleteConfirmModal from './DeleteConfirmModal'
-import { duplicatesColumns, unCratedColumns } from './columns'
+import { duplicateImageColumns, duplicatesColumns, unCratedColumns } from './columns'
 import { fuzzyFilter, transformScanResultsToRows } from './utils'
 
 declare module '@tanstack/table-core' {
@@ -57,10 +57,21 @@ const Table = ({ id }: { id: string }): JSX.Element => {
   }, [results, scan])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
-  const columns = useMemo<ColumnDef<ResultsData>[]>(
-    () => (scan.configuration.scanType === 'duplicate' ? duplicatesColumns : unCratedColumns),
-    []
-  )
+  const columns = useMemo<ColumnDef<ResultsData>[]>(() => {
+    if (scan.configuration.type === 'image') {
+      return duplicateImageColumns
+    }
+
+    if (scan.configuration.scanType === 'duplicate') {
+      return duplicatesColumns
+    }
+
+    if (scan.configuration.scanType === 'not_crated') {
+      return unCratedColumns
+    }
+
+    return []
+  }, [])
 
   const table = useReactTable<ResultsData>({
     columnResizeMode: 'onChange',
@@ -81,6 +92,18 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     onSortingChange: setSorting,
     getSubRows: (row) => {
       if (row.resultType === 'duplicate') {
+        if (scan.configuration.type === 'image') {
+          return row.files.map((file, fileIndex) => ({
+            id: `${row.id}-${fileIndex}`,
+            name: file.name,
+            path: file.path,
+            type: file.type,
+            metadata: file.metadata,
+            files: [],
+            resultType: 'duplicate'
+          }))
+        }
+
         return row.files.map((file, fileIndex) => ({
           id: `${row.id}-${fileIndex}`,
           name: file.name,

@@ -81,7 +81,8 @@ async function processBatch(
       const fileInfo: FileInfo = {
         path,
         name,
-        type: extname(path).substring(1)
+        type: extname(path).substring(1),
+        fileType: type
       }
 
       results.push({ hash: hash.digest('hex'), info: fileInfo })
@@ -95,7 +96,8 @@ async function processBatch(
       const fileInfo: FileInfo = {
         path,
         name,
-        type: extname(path).substring(1)
+        type: extname(path).substring(1),
+        fileType: type
       }
 
       results.push({ hash: name, info: fileInfo })

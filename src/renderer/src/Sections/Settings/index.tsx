@@ -11,7 +11,7 @@ export default function Settings(): JSX.Element {
           <div className="stat">
             <div className="stat-title">Total Deleted FIles</div>
             <div className="stat-value">
-              {status === 'loading' ? 'Loading' : status === 'error' ? 'Error Retrieving' : count}
+              {status === 'pending' ? 'Loading' : status === 'error' ? 'Error Retrieving' : count}
             </div>
           </div>
         </div>

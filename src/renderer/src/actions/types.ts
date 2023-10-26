@@ -2,7 +2,6 @@ import { CrateSrc, FilesDirectory, Scan } from '@prisma/client'
 import {
   ADD_DELETED_FILES_RESULT,
   ADD_NEW_SCAN,
-  ADD_SCAN_TO_ALL_SCANS,
   ADD_TRACKING_DELETE_ID,
   CREATE_CRATE_SRC,
   GET_CRATE_SRCS,
@@ -126,13 +125,6 @@ interface SetScans {
 
 export type AllScan = Pick<Scan, 'id' | 'createdAt' | 'status'>
 
-interface AddScanToAllScans {
-  type: typeof ADD_SCAN_TO_ALL_SCANS
-  payload: {
-    scan: AllScan
-  }
-}
-
 interface UpdateScanConfigurationType {
   type: 'UPDATE_SCAN_CONFIGURATION_TYPE'
   payload: {
@@ -175,7 +167,6 @@ export type MainActions =
   | AddDeletedFilesResult
   | SetErrorMessage
   | SetScans
-  | AddScanToAllScans
   | UpdateScanConfigurationType
   | UpdateScanConfigurationIncludeCrates
   | UpdateScanConfigurationMatchType

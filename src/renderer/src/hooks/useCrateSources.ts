@@ -1,38 +1,45 @@
 import { CrateSrc } from '@prisma/client'
-import { getCrateSrcs, listenForNewCrate } from '@renderer/actions/ipc'
-import { Status } from '@src/types'
+import {
+  getCrateSrcs,
+  listenForNewCrate,
+  removeSelectDirectoryListener
+} from '@renderer/actions/ipc'
+import { DatabaseOperationResult, Status } from '@src/types'
+import { QueryObserverResult, useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
-import useStatus from './useStatus'
 
 const useCrateSources = (): {
   status: Status
   crates: CrateSrc[] | null
-  refetch: () => Promise<void>
+  refetch: () => Promise<QueryObserverResult<DatabaseOperationResult<CrateSrc[]>, Error>>
 } => {
-  const { status, loading, handleResponse, data } = useStatus<CrateSrc[]>()
-
-  useEffect(() => {
-    listenForNewCrate(() => {
-      fetchData()
-    })
+  const {
+    data: res,
+    status,
+    refetch
+  } = useQuery<DatabaseOperationResult<CrateSrc[]>, Error>({
+    queryKey: ['crateSources'],
+    queryFn: getCrateSrcs
   })
 
-  const fetchData = async (): Promise<void> => {
-    loading()
-
-    const response = await getCrateSrcs()
-
-    handleResponse(response)
-  }
+  const { data } = res?.success ? res : { data: null }
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    const callback = (): void => {
+      refetch()
+    }
+
+    listenForNewCrate(callback)
+
+    return () => {
+      removeSelectDirectoryListener(callback)
+    }
+  }, [refetch])
 
   return {
     crates: data,
     status,
-    refetch: fetchData
+    refetch
   }
 }
 

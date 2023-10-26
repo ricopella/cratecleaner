@@ -5,6 +5,7 @@ import { useMain } from '@renderer/context/MainContext'
 import { useTableContext } from '@renderer/context/TableContext'
 import { transformScan } from '@renderer/utils/transformScan'
 import { ADD_NEW_SCAN, REMOVE_DIRECTORIES, UPDATE_ACTIVE_TAB } from '@src/constants'
+import { useQueryClient } from '@tanstack/react-query'
 import { isEmpty, keys } from 'ramda'
 
 const classNames = {
@@ -16,6 +17,7 @@ const classNames = {
 export default function ActionsRow(): JSX.Element {
   const { state, dispatch } = useMain()
   const { rowSelection, setRowSelection } = useTableContext()
+  const queryClient = useQueryClient()
 
   const handleRemoveDirectories = async (): Promise<void> => {
     const rowsToDelete = keys(rowSelection)
@@ -76,11 +78,8 @@ export default function ActionsRow(): JSX.Element {
       }
     })
 
-    dispatch({
-      type: 'ADD_SCAN_TO_ALL_SCANS',
-      payload: {
-        scan
-      }
+    queryClient.invalidateQueries({
+      queryKey: ['scansList']
     })
 
     dispatch({
