@@ -8,9 +8,9 @@ import { TableProvider, useTableContext } from '@renderer/context/TableContext'
 import useFetchDirectories from '@renderer/hooks/useDirectoriesList'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { memo, useEffect, useMemo } from 'react'
+import { fuzzyFilter } from '../Results/utils'
 import ActionsRow from './ActionsRow'
 import ConfigurationPanel from './ConfigurationPanel'
-import { fuzzyFilter } from '../Results/utils'
 
 const classNames = {
   container: 'h-full w-full grid grid-rows-max-1fr-max',
@@ -87,7 +87,7 @@ const List = (): JSX.Element => {
   })
 
   const renderList = (): JSX.Element => {
-    if (status === 'loading') {
+    if (status === 'pending') {
       return (
         <div className="h-full w-full flex justify-center items-center">
           <Loader />

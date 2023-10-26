@@ -29,7 +29,7 @@ export type FileWithMetadata = FileInfo & {
   crates: string[]
 }
 
-export type Status = 'idle' | 'loading' | 'success' | 'error'
+export type Status = 'idle' | 'pending' | 'success' | 'error'
 
 export const ScanConfigurationSchema = z.object({
   directoryPaths: z.array(z.string()),
