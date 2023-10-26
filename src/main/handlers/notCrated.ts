@@ -37,7 +37,8 @@ export async function getNotCratedFiles(configuration: ScanConfiguration): Promi
           metadata: {},
           name: basename(file),
           path: file,
-          type: fileType
+          type: fileType,
+          fileType: type
         }
         if (!filesMap.has(fileInfo.path)) {
           filesMap.set(fileInfo.path, [fileInfo])

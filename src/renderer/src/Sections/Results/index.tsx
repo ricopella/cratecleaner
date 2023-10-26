@@ -92,6 +92,18 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     onSortingChange: setSorting,
     getSubRows: (row) => {
       if (row.resultType === 'duplicate') {
+        if (scan.configuration.type === 'image') {
+          return row.files.map((file, fileIndex) => ({
+            id: `${row.id}-${fileIndex}`,
+            name: file.name,
+            path: file.path,
+            type: file.type,
+            metadata: file.metadata,
+            files: [],
+            resultType: 'duplicate'
+          }))
+        }
+
         return row.files.map((file, fileIndex) => ({
           id: `${row.id}-${fileIndex}`,
           name: file.name,
@@ -100,18 +112,6 @@ const Table = ({ id }: { id: string }): JSX.Element => {
           metadata: file.metadata,
           files: [],
           crates: file.crates,
-          resultType: 'duplicate'
-        }))
-      }
-
-      if (scan.configuration.type === 'image' && scan.configuration.scanType !== 'not_crated') {
-        return row.files.map((file, fileIndex) => ({
-          id: `${row.id}-${fileIndex}`,
-          name: file.name,
-          path: file.path,
-          type: file.type,
-          metadata: file.metadata,
-          files: [],
           resultType: 'duplicate'
         }))
       }

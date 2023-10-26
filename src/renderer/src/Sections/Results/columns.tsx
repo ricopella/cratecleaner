@@ -80,6 +80,9 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
       }
 
       const row = info.row.original as unknown as DuplicateFile
+
+      if (row.fileType === 'image') return
+
       return row?.metadata?.title ?? ''
     },
     enableGrouping: false
@@ -95,6 +98,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
       }
 
       const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'image') return
 
       return row?.metadata?.album ?? ''
     },
@@ -111,6 +115,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
       }
 
       const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'image') return
 
       return row?.metadata?.genre ?? ''
     },
@@ -127,6 +132,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
       }
 
       const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'image') return
 
       return row?.metadata?.bpm ?? ''
     },
@@ -274,12 +280,12 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
     header: 'File Size',
     enableSorting: false,
     cell: (info): CommonValue => {
-      console.log({ info })
       if (info.row.depth === 0) {
         return getCommonValue(info.row.subRows, 'fileSize')
       }
 
       const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'audio') return
 
       return row?.metadata?.fileSize ?? ''
     },
@@ -296,6 +302,7 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
       }
 
       const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'audio') return
 
       return `${row?.metadata?.dimensions.width} x ${row?.metadata?.dimensions.height}` ?? ''
     },
@@ -312,6 +319,7 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
       }
 
       const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'audio') return
 
       return row?.metadata?.created ?? ''
     },
@@ -329,8 +337,9 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
       }
 
       const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'audio') return
 
-      return row?.metadata.modified ?? ''
+      return row?.metadata?.modified ?? ''
     },
     enableGrouping: false,
     size: 32

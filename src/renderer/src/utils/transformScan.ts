@@ -1,10 +1,5 @@
 import { DeletedFiles, Scan } from '@prisma/client'
-import {
-  ExtendedScan,
-  ScanConfigurationSchema,
-  ScanResultsSchemaWithAudio,
-  ScanResultsSchemaWithImage
-} from '@src/types'
+import { ExtendedScan, ScanConfigurationSchema, ScanResultsSchema } from '@src/types'
 import { transformDeletedFiles } from './transformDeletedFiles'
 
 export const transformScan = (
@@ -13,10 +8,7 @@ export const transformScan = (
   }
 ): ExtendedScan => {
   const configurationRes = ScanConfigurationSchema.safeParse(JSON.parse(scan.configuration))
-  const resultsRes =
-    configurationRes.success && configurationRes.data.type === 'audio'
-      ? ScanResultsSchemaWithAudio.safeParse(JSON.parse(scan.results ?? '{}'))
-      : ScanResultsSchemaWithImage.safeParse(JSON.parse(scan.results ?? '{}'))
+  const resultsRes = ScanResultsSchema.safeParse(JSON.parse(scan.results ?? '{}'))
   const deletedFiles = (scan.deletedFiles || []).map((f) => transformDeletedFiles(f))
 
   if (configurationRes.success === false || resultsRes.success === false) {

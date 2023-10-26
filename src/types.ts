@@ -19,6 +19,7 @@ export interface TableContextProps {
 }
 
 export type FileInfo = {
+  fileType: string
   name: string
   path: string
   type: string
@@ -63,30 +64,28 @@ const imageFileMetadata = z.object({
   lensModel: z.string().nullish()
 })
 
-const fileMetadata = z.union([audioFileMetadata, imageFileMetadata])
-
-const duplicateFile = z.object({
+const baseFileSchema = z.object({
   name: z.string(),
   path: z.string(),
   type: z.string(),
-  metadata: fileMetadata.nullish(),
   crates: z.array(z.string())
 })
 
-const duplicateAudioFile = z.object({
-  name: z.string(),
-  path: z.string(),
-  type: z.string(),
-  metadata: audioFileMetadata.nullish(),
-  crates: z.array(z.string())
+const audioFile = baseFileSchema.extend({
+  fileType: z.literal('audio'),
+  metadata: audioFileMetadata.nullish()
 })
 
-const duplicateImageFile = z.object({
-  name: z.string(),
-  path: z.string(),
-  type: z.string(),
-  metadata: imageFileMetadata.nullish(),
-  crates: z.array(z.string())
+const imageFile = baseFileSchema.extend({
+  fileType: z.literal('image'),
+  metadata: imageFileMetadata.nullish()
+})
+
+const duplicateFile = z.union([audioFile, imageFile])
+
+const resultsSchema = z.object({
+  files: z.record(z.string(), z.array(duplicateFile)),
+  errors: z.array(z.string()).optional()
 })
 
 const notCrateFile = z.object({
@@ -100,19 +99,7 @@ export type DuplicateFile = z.infer<typeof duplicateFile>
 
 export type NotCrateFile = z.infer<typeof notCrateFile>
 
-const resultsSchema = z.object({
-  files: z.record(z.string(), z.array(duplicateAudioFile)),
-  errors: z.array(z.string()).optional()
-})
-
-const resultsImageSchema = z.object({
-  files: z.record(z.string(), z.array(duplicateImageFile)),
-  errors: z.array(z.string()).optional()
-})
-
 export const ScanResultsSchema = z.union([resultsSchema, z.null()])
-export const ScanResultsSchemaWithAudio = z.union([resultsSchema, z.null()])
-export const ScanResultsSchemaWithImage = z.union([resultsImageSchema, z.null()])
 
 export type ScanResults = z.infer<typeof resultsSchema>
 
