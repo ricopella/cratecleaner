@@ -1,25 +1,17 @@
 import { getDeletedFilesCount } from '@renderer/actions/ipc'
 import { Status } from '@src/types'
-import { useEffect } from 'react'
-import useStatus from './useStatus'
+import { useQuery } from '@tanstack/react-query'
 
 const useDeletedFilesCount = (): {
   status: Status
   count: number | null
 } => {
-  const { status, loading, handleResponse, data } = useStatus<number>()
+  const { data: res, status } = useQuery({
+    queryKey: ['deletedFilesCount'],
+    queryFn: getDeletedFilesCount
+  })
 
-  const fetchData = async (): Promise<void> => {
-    loading()
-
-    const response = await getDeletedFilesCount()
-
-    handleResponse(response)
-  }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
+  const { data } = res?.success ? res : { data: null }
 
   return {
     count: data,

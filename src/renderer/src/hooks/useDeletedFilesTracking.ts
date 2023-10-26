@@ -3,7 +3,8 @@ import { getDeletedFilesById } from '@renderer/actions/ipc'
 import { useMain } from '@renderer/context/MainContext'
 import { transformDeletedFiles } from '@renderer/utils/transformDeletedFiles'
 import { ADD_DELETED_FILES_RESULT } from '@src/constants'
-import { ExtendedScan } from '@src/types'
+import { DatabaseOperationResult } from '@src/types'
+import { useQueries, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 
 /**
@@ -21,52 +22,49 @@ const useDeletedFilesTracking = ({
   state: ReturnType<typeof useMain>['state']
   dispatch: ReturnType<typeof useMain>['dispatch']
 }): void => {
-  useEffect(() => {
-    const intervalIds: NodeJS.Timeout[] = []
-    const pollingDuration = 3 * 60 * 1000 // timeout at 3 min
+  const queryClient = useQueryClient()
+  const scans = Object.values(state.scans)
 
-    Object.keys(state.scans).forEach((id) => {
-      const scan = state.scans[id]
-      const { trackingDeleteId } = scan
-      const deletedFiles =
-        (scan as ExtendedScan & { deletedFiles: DeletedFiles[] })?.deletedFiles ?? []
-      const deletedFilesIds = deletedFiles.map((file) => file.id)
-
-      if (trackingDeleteId && !deletedFilesIds.includes(trackingDeleteId)) {
-        const intervalId = setInterval(async () => {
-          const deleteRes = await getDeletedFilesById(trackingDeleteId)
-
-          if (deleteRes.success === false) {
-            clearInterval(intervalId)
-          }
-
-          if (deleteRes.success && deleteRes.data) {
-            clearInterval(intervalId)
-
-            dispatch({
-              type: ADD_DELETED_FILES_RESULT,
-              payload: {
-                scanId: id,
-                deletedFiles: transformDeletedFiles(deleteRes.data)
-              }
-            })
-          }
-        })
-
-        intervalIds.push(intervalId)
+  const queries = useQueries({
+    queries: scans.map((scan) => ({
+      queryKey: ['deletedFiles', scan.trackingDeleteId],
+      queryFn: () => (scan.trackingDeleteId ? getDeletedFilesById(scan.trackingDeleteId) : null),
+      refetchInterval: 2000, // Refetch every 2 seconds
+      onSuccess: (deleteRes: DatabaseOperationResult<DeletedFiles | null>): void => {
+        if (deleteRes.success && deleteRes.data) {
+          dispatch({
+            type: ADD_DELETED_FILES_RESULT,
+            payload: {
+              scanId: scan.id,
+              deletedFiles: transformDeletedFiles(deleteRes.data)
+            }
+          })
+        }
       }
-    })
+    }))
+  })
 
-    const timeoutId = setTimeout(() => {
-      intervalIds.forEach((id) => clearInterval(id))
-    }, pollingDuration)
+  useEffect(() => {
+    const timeoutId = setTimeout(
+      () => {
+        scans.forEach((scan) => {
+          queryClient.removeQueries({
+            queryKey: ['deletedFiles', scan.trackingDeleteId]
+          })
+        })
+      },
+      3 * 60 * 1000
+    ) // Stop refetching after 3 minutes
 
     return () => {
       clearTimeout(timeoutId)
-
-      intervalIds.forEach((id) => clearInterval(id))
+      scans.forEach((scan) => {
+        queryClient.removeQueries({
+          queryKey: ['deletedFiles', scan.trackingDeleteId]
+        })
+      })
     }
-  }, [state.scans, dispatch])
+  }, [queries])
 }
 
 export default useDeletedFilesTracking

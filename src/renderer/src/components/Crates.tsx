@@ -6,7 +6,7 @@ export default function Crates(): JSX.Element {
   const { status: crateStatus, crates, refetch } = useCrateSources()
 
   const renderContent = (): JSX.Element => {
-    if (crateStatus === 'loading') {
+    if (crateStatus === 'pending') {
       return (
         <div>
           <Loader />
