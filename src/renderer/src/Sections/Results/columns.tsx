@@ -344,7 +344,38 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
     enableGrouping: false,
     size: 32
   },
-  // TODO add camera & lens
+  {
+    id: 'cameraModel',
+    accessorKey: 'cameraModel',
+    header: 'Camera Model',
+    enableSorting: false,
+    cell: (info): CommonValue => {
+      if (info.row.depth === 0) {
+        return null
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'audio') return
+
+      return row?.metadata?.cameraModel ?? ''
+    }
+  },
+  {
+    id: 'lensModel',
+    accessorKey: 'lensModel',
+    header: 'Lens Model',
+    enableSorting: false,
+    cell: (info): CommonValue => {
+      if (info.row.depth === 0) {
+        return null
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'audio') return
+
+      return row?.metadata?.lensModel ?? ''
+    }
+  },
   {
     id: 'duplicateCount',
     size: 24,
