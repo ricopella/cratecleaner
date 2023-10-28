@@ -1,6 +1,6 @@
 import { Scan } from '@prisma/client'
 import { getScansList } from '@renderer/actions/ipc'
-import { useMain } from '@renderer/context/MainContext'
+import useMain from '@renderer/context/hooks/useMain'
 import { DatabaseOperationResult } from '@src/types'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
@@ -31,5 +31,5 @@ export default function useScansList(): void {
         }
       })
     }
-  }, [data])
+  }, [data, dispatch])
 }

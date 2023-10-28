@@ -1,6 +1,6 @@
 import { FilesDirectory } from '@prisma/client'
 import { getFilesDirectories } from '@renderer/actions/ipc'
-import { useMain } from '@renderer/context/MainContext'
+import useMain from '@renderer/context/hooks/useMain'
 import { GET_FILES_DIRECTORIES } from '@src/constants'
 import { DatabaseOperationResult } from '@src/types'
 import { useQuery } from '@tanstack/react-query'

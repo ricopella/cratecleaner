@@ -3,8 +3,8 @@ import {
   duplicatesColumns,
   unCratedColumns
 } from '@renderer/Sections/Results/columns'
-import { useMain } from '@renderer/context/MainContext'
-import { useTableContext } from '@renderer/context/TableContext'
+import useMain from '@renderer/context/hooks/useMain'
+import useTableContext from '@renderer/context/hooks/useTableContext'
 import { useEffect, useMemo } from 'react'
 
 const columMap = {
@@ -58,6 +58,7 @@ const ColumnSelection = ({ id }: { id: string }): JSX.Element => {
         {}
       )
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleCheckboxChange = (columnName: string): void => {

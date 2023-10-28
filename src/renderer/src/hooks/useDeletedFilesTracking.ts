@@ -1,6 +1,6 @@
 import { DeletedFiles } from '@prisma/client'
 import { getDeletedFilesById } from '@renderer/actions/ipc'
-import { useMain } from '@renderer/context/MainContext'
+import useMain from '@renderer/context/hooks/useMain'
 import { transformDeletedFiles } from '@renderer/utils/transformDeletedFiles'
 import { ADD_DELETED_FILES_RESULT } from '@src/constants'
 import { ExtendedScan } from '@src/types'

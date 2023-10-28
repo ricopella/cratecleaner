@@ -1,6 +1,6 @@
 import { InputHTMLAttributes, memo, useEffect, useState } from 'react'
 
-export default memo(function DebouncedInput({
+const Input = memo(function DebouncedInput({
   value: initialValue,
   onChange,
   debounce = 500,
@@ -24,7 +24,7 @@ export default memo(function DebouncedInput({
     }, debounce)
 
     return (): void => clearTimeout(timeout)
-  }, [value])
+  }, [debounce, onChange, value])
 
   return (
     <input
@@ -35,3 +35,5 @@ export default memo(function DebouncedInput({
     />
   )
 })
+
+export default Input

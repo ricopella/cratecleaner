@@ -7,5 +7,5 @@ export const useIpcListener = <T>(channel: string, callback: IPCListenerCallBack
     return () => {
       removeListener()
     }
-  }, [channel])
+  }, [callback, channel])
 }

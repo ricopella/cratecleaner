@@ -38,5 +38,5 @@ export const usePolling = <T>(
         clearInterval(intervalId.current)
       }
     }
-  }, [callback, interval])
+  }, [callback, dispatch, interval])
 }

@@ -164,7 +164,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
     header: 'Crates',
     accessorFn: (row): number => {
       if ((row as DuplicateData)?.files?.length === 0) {
-        // @ts-ignore
+        // @ts-ignore row type is incorrect
         return (row.crates || []).length
       }
 
@@ -175,7 +175,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
     cell: (info): JSX.Element | number | string => {
       if (info.row.depth === 0) {
         const count = info.row.subRows.reduce((acc, row) => {
-          // @ts-ignore
+          // @ts-ignore row type is incorrect
           return acc + row.original?.crates?.length ?? 0
         }, 0)
 

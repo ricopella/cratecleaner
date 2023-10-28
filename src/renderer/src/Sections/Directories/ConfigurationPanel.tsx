@@ -1,4 +1,4 @@
-import { useMain } from '@renderer/context/MainContext'
+import useMain from '@renderer/context/hooks/useMain'
 import { useEffect } from 'react'
 
 const classNames = {
@@ -74,7 +74,7 @@ export default function ConfigurationPanel(): JSX.Element {
         }
       })
     }
-  }, [type, scanConfiguration.scanType, dispatch])
+  }, [type, scanConfiguration.scanType, dispatch, scanType, includeCrates])
 
   return (
     <div className="rounded-t bg-base-200 p-4 border-b-2 border-base-content border-opacity-5">

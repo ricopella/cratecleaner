@@ -1,5 +1,5 @@
 import { deleteFiles } from '@renderer/actions/ipc'
-import { useMain } from '@renderer/context/MainContext'
+import useMain from '@renderer/context/hooks/useMain'
 import { ADD_TRACKING_DELETE_ID } from '@src/constants'
 import { DuplicateData, NotCratedData, ResultsData } from '@src/types'
 import { memo } from 'react'
@@ -13,7 +13,7 @@ type Props = {
   selected: Record<string, boolean>
 }
 
-export default memo(function deleteWarningModal({
+const DeleteModal = memo(function DeleteWarningModal({
   data,
   id,
   selected,
@@ -79,3 +79,5 @@ export default memo(function deleteWarningModal({
     </dialog>
   )
 })
+
+export default DeleteModal

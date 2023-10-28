@@ -1,8 +1,8 @@
 import { TableContextProps } from '@src/types'
 import { ExpandedState, VisibilityState } from '@tanstack/react-table'
-import React, { ReactNode, createContext, useContext, useState } from 'react'
+import React, { ReactNode, createContext, useState } from 'react'
 
-const TableContext = createContext<TableContextProps | undefined>(undefined)
+export const TableContext = createContext<TableContextProps | undefined>(undefined)
 
 interface TableProviderProps {
   children: ReactNode
@@ -30,12 +30,4 @@ export const TableProvider: React.FC<TableProviderProps> = ({ children }) => {
       {children}
     </TableContext.Provider>
   )
-}
-
-export const useTableContext = (): TableContextProps => {
-  const context = useContext(TableContext)
-  if (!context) {
-    throw new Error('useTableContext must be used within a TableProvider')
-  }
-  return context
 }

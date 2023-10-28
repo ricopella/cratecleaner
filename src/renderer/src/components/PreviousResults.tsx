@@ -1,4 +1,4 @@
-import { useMain } from '@renderer/context/MainContext'
+import useMain from '@renderer/context/hooks/useMain'
 import useScansList from '@renderer/hooks/useScansList'
 import { UPDATE_ACTIVE_TAB } from '@src/constants'
 import { format } from 'date-fns'

@@ -1,5 +1,5 @@
 import { fetchScanStatusById } from '@renderer/actions/ipc'
-import { useMain } from '@renderer/context/MainContext'
+import useMain from '@renderer/context/hooks/useMain'
 import { transformScan } from '@renderer/utils/transformScan'
 import { UPDATE_SCAN_STATUS } from '@src/constants'
 import { useEffect } from 'react'
@@ -112,7 +112,7 @@ const useScanTracking = ({
       clearTimeout(timeoutId)
       intervalIds.forEach((id) => clearInterval(id))
     }
-  }, [state.scans])
+  }, [dispatch, state.scans])
 }
 
 export default useScanTracking
