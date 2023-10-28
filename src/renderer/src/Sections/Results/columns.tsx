@@ -6,6 +6,7 @@ import { getCommonValue } from './utils'
 
 export const duplicatesColumns: ColumnDef<ResultsData>[] = [
   {
+    id: 'id',
     accessorKey: 'id',
     enableGrouping: true,
     size: 16,
@@ -49,6 +50,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
   },
   {
     accessorKey: 'name',
+    header: 'Name',
     cell: (info) => info.getValue(),
     enableGrouping: false,
     enableSorting: true
@@ -253,7 +255,9 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
     )
   },
   {
+    id: 'name',
     accessorKey: 'name',
+    header: 'Name',
     cell: (info) => info.getValue(),
     enableGrouping: false,
     enableSorting: true
@@ -390,6 +394,7 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
 
 export const unCratedColumns: ColumnDef<ResultsData>[] = [
   {
+    id: 'id',
     accessorKey: 'id',
     enableGrouping: true,
     size: 16,
@@ -411,7 +416,9 @@ export const unCratedColumns: ColumnDef<ResultsData>[] = [
     )
   },
   {
+    id: 'name',
     accessorKey: 'name',
+    header: 'Name',
     cell: (info) => info.getValue(),
     enableGrouping: false,
     enableSorting: true

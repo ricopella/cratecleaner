@@ -1,15 +1,54 @@
+import {
+  duplicateImageColumns,
+  duplicatesColumns,
+  unCratedColumns
+} from '@renderer/Sections/Results/columns'
+import { useMain } from '@renderer/context/MainContext'
 import { useTableContext } from '@renderer/context/TableContext'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
-const ColumnSelection = ({
-  columns
-}: {
-  columns: {
-    key: string
-    name: string
-  }[]
-}): JSX.Element => {
+const columMap = {
+  duplicateAudio: duplicatesColumns,
+  duplicateImage: duplicateImageColumns,
+  uncrated: unCratedColumns
+}
+
+const ColumnSelection = ({ id }: { id: string }): JSX.Element => {
+  const { state } = useMain()
+  const scan = state.scans[id]
+  const { type, scanType, includeCrates } = scan.configuration
   const { columnVisibility, setColumnVisibility } = useTableContext()
+
+  const columns: { key: string; name: string }[] = useMemo(() => {
+    if (type === 'image') {
+      return columMap['duplicateImage']
+        .map((col) => ({
+          key: col.id as string,
+          name: col.header as string
+        }))
+        .filter((col) => col.key && col.key !== 'id')
+    }
+
+    if (scanType === 'duplicate') {
+      return columMap['duplicateAudio']
+        .map((col) => ({
+          key: col.id as string,
+          name: col.header as string
+        }))
+        .filter((col) => col.key && (includeCrates || col.key !== 'crates') && col.key !== 'id')
+    }
+
+    if (scanType === 'not_crated') {
+      return columMap['uncrated']
+        .map((col) => ({
+          key: col.id as string,
+          name: col.header as string
+        }))
+        .filter((col) => col.key && col.key !== 'id')
+    }
+
+    return []
+  }, [type, scanType, includeCrates])
 
   useEffect(() => {
     // on mount set all to true except crates
@@ -39,14 +78,14 @@ const ColumnSelection = ({
       >
         {columns.map((col) => (
           <li key={col.key}>
-            <a>
+            <label>
               <input
                 type="checkbox"
                 checked={columnVisibility[col.key] !== undefined ? columnVisibility[col.key] : true}
                 onChange={(): void => handleCheckboxChange(col.key)}
               />
               <span>{col.name}</span>
-            </a>
+            </label>
           </li>
         ))}
       </ul>
