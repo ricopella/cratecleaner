@@ -1,5 +1,5 @@
 import Directories from '@renderer/Sections/Directories'
-import { useMain } from '@renderer/context/MainContext'
+import useMain from '@renderer/context/hooks/useMain'
 import { REMOVE_SCAN, UPDATE_ACTIVE_TAB } from '@src/constants'
 import { keys } from 'ramda'
 import { Suspense, lazy, memo, useMemo } from 'react'
@@ -15,7 +15,7 @@ const classNames = {
   contentContainer: 'bg-base-300 h-full w-full rounded-t-none rounded-b overflow-hidden p-4'
 }
 
-function SectionTabs(): JSX.Element {
+const Tabs = memo(function SectionTabs(): JSX.Element {
   const { state, dispatch } = useMain()
 
   const handleTabClick = (tabId: string): void => {
@@ -101,6 +101,6 @@ function SectionTabs(): JSX.Element {
       </Suspense>
     </div>
   )
-}
+})
 
-export default memo(SectionTabs)
+export default Tabs

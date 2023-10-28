@@ -41,6 +41,7 @@
     "daisyui": "^3.8.2",
     "date-fns": "^2.30.0",
     "electron-updater": "^6.1.1",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "exifreader": "^4.14.1",
     "music-metadata": "7.13.4",
     "ramda": "^0.29.0",

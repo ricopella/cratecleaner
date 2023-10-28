@@ -6,6 +6,7 @@ import { getCommonValue } from './utils'
 
 export const duplicatesColumns: ColumnDef<ResultsData>[] = [
   {
+    id: 'id',
     accessorKey: 'id',
     enableGrouping: true,
     size: 16,
@@ -49,6 +50,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
   },
   {
     accessorKey: 'name',
+    header: 'Name',
     cell: (info) => info.getValue(),
     enableGrouping: false,
     enableSorting: true
@@ -162,7 +164,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
     header: 'Crates',
     accessorFn: (row): number => {
       if ((row as DuplicateData)?.files?.length === 0) {
-        // @ts-ignore
+        // @ts-ignore row type is incorrect
         return (row.crates || []).length
       }
 
@@ -173,7 +175,7 @@ export const duplicatesColumns: ColumnDef<ResultsData>[] = [
     cell: (info): JSX.Element | number | string => {
       if (info.row.depth === 0) {
         const count = info.row.subRows.reduce((acc, row) => {
-          // @ts-ignore
+          // @ts-ignore row type is incorrect
           return acc + row.original?.crates?.length ?? 0
         }, 0)
 
@@ -253,7 +255,9 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
     )
   },
   {
+    id: 'name',
     accessorKey: 'name',
+    header: 'Name',
     cell: (info) => info.getValue(),
     enableGrouping: false,
     enableSorting: true
@@ -344,7 +348,38 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
     enableGrouping: false,
     size: 32
   },
-  // TODO add camera & lens
+  {
+    id: 'cameraModel',
+    accessorKey: 'cameraModel',
+    header: 'Camera Model',
+    enableSorting: false,
+    cell: (info): CommonValue => {
+      if (info.row.depth === 0) {
+        return null
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'audio') return
+
+      return row?.metadata?.cameraModel ?? ''
+    }
+  },
+  {
+    id: 'lensModel',
+    accessorKey: 'lensModel',
+    header: 'Lens Model',
+    enableSorting: false,
+    cell: (info): CommonValue => {
+      if (info.row.depth === 0) {
+        return null
+      }
+
+      const row = info.row.original as unknown as DuplicateFile
+      if (row.fileType === 'audio') return
+
+      return row?.metadata?.lensModel ?? ''
+    }
+  },
   {
     id: 'duplicateCount',
     size: 24,
@@ -359,6 +394,7 @@ export const duplicateImageColumns: ColumnDef<ResultsData>[] = [
 
 export const unCratedColumns: ColumnDef<ResultsData>[] = [
   {
+    id: 'id',
     accessorKey: 'id',
     enableGrouping: true,
     size: 16,
@@ -380,7 +416,9 @@ export const unCratedColumns: ColumnDef<ResultsData>[] = [
     )
   },
   {
+    id: 'name',
     accessorKey: 'name',
+    header: 'Name',
     cell: (info) => info.getValue(),
     enableGrouping: false,
     enableSorting: true

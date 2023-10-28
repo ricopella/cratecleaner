@@ -11,7 +11,7 @@ export default function IndeterminateCheckbox({
     if (typeof indeterminate === 'boolean') {
       ref.current.indeterminate = !rest.checked && indeterminate
     }
-  }, [ref, indeterminate])
+  }, [ref, indeterminate, rest.checked])
 
   return (
     <div className="flex items-center">

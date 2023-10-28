@@ -1,7 +1,8 @@
 import Loader from '@renderer/components/Loader'
 import Body from '@renderer/components/Table/Body'
-import { useMain } from '@renderer/context/MainContext'
-import { TableProvider, useTableContext } from '@renderer/context/TableContext'
+import { TableProvider } from '@renderer/context/TableContext'
+import useMain from '@renderer/context/hooks/useMain'
+import useTableContext from '@renderer/context/hooks/useTableContext'
 import { ResultsData, ScanResults } from '@src/types'
 import { RankingInfo } from '@tanstack/match-sorter-utils'
 import {
@@ -50,13 +51,12 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     setRowSelection
   } = useTableContext()
   const scan = state.scans[id]
-  const results: ScanResults = scan.results ?? { files: {} }
+  const results: ScanResults = useMemo(() => scan.results ?? { files: {} }, [scan])
   const [sorted, setSorting] = useState<SortingState>([])
   const data: ResultsData[] = useMemo(() => {
     return transformScanResultsToRows(results, scan)
   }, [results, scan])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
   const columns = useMemo<ColumnDef<ResultsData>[]>(() => {
     if (scan.configuration.type === 'image') {
       return duplicateImageColumns
@@ -71,7 +71,7 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     }
 
     return []
-  }, [])
+  }, [scan])
 
   const table = useReactTable<ResultsData>({
     columnResizeMode: 'onChange',

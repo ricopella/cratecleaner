@@ -1,7 +1,7 @@
 import DebouncedInput from '@renderer/components/DebouncedInput'
 import ColumnSelection from '@renderer/components/Table/ColumnSelection'
-import { useMain } from '@renderer/context/MainContext'
-import { useTableContext } from '@renderer/context/TableContext'
+import useMain from '@renderer/context/hooks/useMain'
+import useTableContext from '@renderer/context/hooks/useTableContext'
 import { values } from 'ramda'
 import { useMemo } from 'react'
 import ErrorIcon from '../../assets/error.svg?react'
@@ -59,52 +59,7 @@ export default function ConfigurationPanel({ id }: { id: string }): JSX.Element 
         )}
 
         <div className="grid md:grid-cols-max-max md:gap-4 gap-2">
-          <ColumnSelection
-            columns={[
-              {
-                key: 'name',
-                name: 'Name'
-              },
-              {
-                key: 'path',
-                name: 'Path'
-              },
-              {
-                key: 'title',
-                name: 'Title'
-              },
-              {
-                key: 'artist',
-                name: 'Artist'
-              },
-              {
-                key: 'album',
-                name: 'Album'
-              },
-              {
-                key: 'genre',
-                name: 'Genre'
-              },
-              {
-                key: 'bpm',
-                name: 'BPM'
-              },
-              {
-                key: 'type',
-                name: 'Type'
-              },
-              {
-                key: 'crates',
-                name: 'Crates'
-              },
-              {
-                key: 'duplicateCount',
-                name: 'Duplicate Count'
-              }
-            ].filter((column) => {
-              return includeCrates || column.key !== 'crates'
-            })}
-          />
+          <ColumnSelection id={id} />
 
           <DebouncedInput
             value={filter ?? ''}

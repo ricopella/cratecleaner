@@ -1,6 +1,6 @@
 import ErrorMessage from '@renderer/components/ErrorMessage'
-import { useMain } from '@renderer/context/MainContext'
-import { useTableContext } from '@renderer/context/TableContext'
+import useMain from '@renderer/context/hooks/useMain'
+import useTableContext from '@renderer/context/hooks/useTableContext'
 import { useMemo } from 'react'
 
 const classNames = {
