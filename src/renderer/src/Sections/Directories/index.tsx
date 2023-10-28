@@ -7,7 +7,7 @@ import { useMain } from '@renderer/context/MainContext'
 import { TableProvider, useTableContext } from '@renderer/context/TableContext'
 import useFetchDirectories from '@renderer/hooks/useDirectoriesList'
 import { createColumnHelper, getCoreRowModel, useReactTable } from '@tanstack/react-table'
-import { memo, useEffect, useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { fuzzyFilter } from '../Results/utils'
 import ActionsRow from './ActionsRow'
 import ConfigurationPanel from './ConfigurationPanel'
@@ -22,11 +22,7 @@ const List = (): JSX.Element => {
   const { state } = useMain()
   const { rowSelection, setRowSelection } = useTableContext()
 
-  const { status, fetchData } = useFetchDirectories()
-
-  useEffect(() => {
-    fetchData()
-  }, [])
+  const { status } = useFetchDirectories()
 
   const directories = state.directorySrcs
 

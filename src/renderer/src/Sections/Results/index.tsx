@@ -56,7 +56,6 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     return transformScanResultsToRows(results, scan)
   }, [results, scan])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
   const columns = useMemo<ColumnDef<ResultsData>[]>(() => {
     if (scan.configuration.type === 'image') {
       return duplicateImageColumns
@@ -71,7 +70,7 @@ const Table = ({ id }: { id: string }): JSX.Element => {
     }
 
     return []
-  }, [])
+  }, [scan])
 
   const table = useReactTable<ResultsData>({
     columnResizeMode: 'onChange',
