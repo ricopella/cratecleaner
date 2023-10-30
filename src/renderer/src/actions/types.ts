@@ -22,7 +22,7 @@ export type MainState = {
   directorySrcs: FilesDirectory[]
   error: string | null
   scans: Record<string, ExtendedScan>
-  allScans: Pick<Scan, 'id' | 'createdAt' | 'status'>[]
+  allScans: Pick<Scan, 'id' | 'createdAt' | 'status' | 'configuration'>[]
   scanConfiguration: {
     type: 'audio' | 'image'
     includeCrates: boolean

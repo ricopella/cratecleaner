@@ -107,9 +107,9 @@ export const insertScan = (
 }
 
 export const getScansList = (): Promise<
-  DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>
+  DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status' | 'configuration'>[]>
 > => {
-  return invokeIPC<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(GET_SCANS_LIST)
+  return invokeIPC<Pick<Scan, 'id' | 'createdAt' | 'status' | 'configuration'>[]>(GET_SCANS_LIST)
 }
 
 export const deleteFiles = (

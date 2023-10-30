@@ -82,32 +82,35 @@ export const updateScanById = async (
 }
 
 export const getScansList = (): Promise<
-  DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>
+  DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status' | 'configuration'>[]>
 > => {
-  return performDatabaseOperation<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>(() =>
-    prisma.scan.findMany({
-      where: {
-        status: 'completed'
-      },
-      select: {
-        id: true,
-        createdAt: true,
-        status: true,
-        deletedFiles: {
-          select: {
-            id: true,
-            count: true,
-            status: true,
-            errors: true,
-            success: true,
-            scanId: true
+  return performDatabaseOperation<Pick<Scan, 'id' | 'createdAt' | 'status' | 'configuration'>[]>(
+    () =>
+      prisma.scan.findMany({
+        where: {
+          status: 'completed'
+        },
+        select: {
+          id: true,
+          createdAt: true,
+          status: true,
+          configuration: true,
+          deletedFiles: {
+            select: {
+              id: true,
+              count: true,
+              status: true,
+              errors: true,
+              success: true,
+              scanId: true
+            }
           }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        take: 10
+      })
   )
 }
 
