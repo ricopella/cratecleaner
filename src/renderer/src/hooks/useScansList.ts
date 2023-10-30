@@ -8,7 +8,9 @@ import { useEffect } from 'react'
 export default function useScansList(): void {
   const { dispatch } = useMain()
 
-  const { data } = useQuery<DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status'>[]>>({
+  const { data } = useQuery<
+    DatabaseOperationResult<Pick<Scan, 'id' | 'createdAt' | 'status' | 'configuration'>[]>
+  >({
     queryKey: ['scansList'],
     queryFn: getScansList
   })
